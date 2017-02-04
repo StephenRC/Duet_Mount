@@ -1,6 +1,8 @@
 # Duet_Mount
 Something to mount a Duet, DuetWifi, DueX5 and the DueX4 to 2020 extrusion.
 
+https://creativecommons.org/licenses/by-nc/3.0/
+
 DuetWifi port cover not currently designed for the suggested back to back mounting of DueX2/DueX5 with the DuetWifi.
 
 Uses cubeX from http://www.thingiverse.com/thing:112008
