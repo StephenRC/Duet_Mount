@@ -1,5 +1,10 @@
 # Duet_Mount
-Something to mount a Duet, DuetWifi, DueX5 and the DueX4 to 2020 extrusion.
+Duet 085 is in duet2020v0.2.scad and duet2020v0.3.scad
+
+Duet 2 Wifi & Ethernet, DueX2 and DueX5 is in duetv0.2.scad and duet2020v0.3.scad 
+
+Duet 3 is in duet2020v0.3.scad
+
 
 https://creativecommons.org/licenses/by-nc/3.0/
 
