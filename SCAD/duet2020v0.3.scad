@@ -71,6 +71,9 @@ D3HoleOffset=4.3;
 DWidth = 100;	// The Duet 0.85 size is the same as Duet 2; http://reprap.org/wiki/Duet for Duet 085
 DLength = 123;	// rounded up from original 129.999
 DHoleOffset = 4;	// all four holes are at the corners
+bwidth = DWidth;	// Duet 0.85 info from http://reprap.org/wiki/Duet
+blength = DLength;	// rounded up from original 129.999
+hole_offset = DHoleOffset;	// all four holes are at the corners
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Duet2(2,2,1,DWidth,DLength,DHoleOffset,2);	// 1st arg: 0-duet&port cover;1-overhang duet&port cover
