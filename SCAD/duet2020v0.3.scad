@@ -68,6 +68,8 @@ D2HoleOffset = 4;	// Duet 085 corner hole offset
 D3Width = 140;		// Duet 3 width
 D3Length=134;		// Duet3 length
 D3HoleOffset=4.3;	// Duet 3 corner hole offset
+PIWidth=20;			// PI width
+PIHeight=10;		// PI heigth
 //------------------------------------
 Use3mmInsert=1;
 Use4mmInsert=1; // not used 4/7/20
