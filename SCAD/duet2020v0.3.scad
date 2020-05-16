@@ -2,7 +2,7 @@
 // duet2020.scad - mount a duet to 2020 extrusion
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 5/5/2016
-// last update 4/7/2020
+// last update 5/8/2020
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5/22/16	- Added DueX4 board and a simple covers for the Duet & DueX4
 // 6/26/16	- Added overhang version where it places the board out over the 2020 it mounts on
@@ -21,6 +21,8 @@
 // 1/18/17	- Added colors to preview for easier editing
 // 4/5/20	- Added Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
+// 5/7/20	- Started to add a pi4 mount for the Duet3
+// 5/8/20	- May need to adjust pi4 mount position
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Demensions from:
 // Duet 0.8.5: http://reprap.org/wiki/Duet#Dimensions
@@ -41,6 +43,7 @@
 // includes
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad> // http://www.thingiverse.com/thing:112008
+use <brassfunctions.scad>
 $fn=50;		// 100 takes a long, long time to render
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // vars
@@ -62,17 +65,15 @@ NozzleDiameter = 0.4;	// hotend nozzle size for wifi antenna protection support
 D085Width = 100;	// Duet 085 width
 D085Length = 123;	// Duet 085 length rounded up
 D085HoleOffset = 4;	// Duet 085 corner hole offset
-D2Width = 100;		// Duet 085 width
-D2Length = 123;		// Duet 085 length rounded up
-D2HoleOffset = 4;	// Duet 085 corner hole offset
+D2Width = 100;		// Duet 2 width
+D2Length = 123;		// Duet 2 length
+D2HoleOffset = 4;	// Duet 2 corner hole offset
 D3Width = 140;		// Duet 3 width
-D3Length=134;		// Duet3 length
+D3Length=134;		// Duet 3 length
 D3HoleOffset=4.3;	// Duet 3 corner hole offset
 PIWidth=20;			// PI width
 PIHeight=10;		// PI heigth
 //------------------------------------
-Use3mmInsert=1;
-Use4mmInsert=1; // not used 4/7/20
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Cover(D085Width,D085Length);
@@ -137,12 +138,13 @@ module partial(Width,Length,HoleOffset) {
 	//duetoverhang(2);	// Duet 0.8.5 & DuetWiFi puts i/o ports close the the outer edge of the 2020
 	//dueX4();	// DueX4 expansion board
 	//dueX25(0); //  0 - does just the spacers, 1 - include board platform
-	cover();	// something to keep stuff from falling on the exposed board
+	//cover();	// something to keep stuff from falling on the exposed board
 	//coverx4();
 	//translate([0,-20,0]) // use with duet() for port cover
 	//	portcover(0,0,0,Width,Length,HoleOffset); // 0 = Duet 0.8.5; 2 - DuetWiFi; 3 = Duet3
 	//translate([0,-35,0])
 	//	blower_adapter(20,15,48);
+	pi4_mount();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -172,6 +174,9 @@ module Duet3(Width,Length,HoleOffset,Thickness,Cover=0,Blower=0,MSTab)
 	platform3(Width,Length,HoleOffset);
 	mount3(Width,Length,HoleOffset,MSTab);
 	supports3(Width,Length,HoleOffset);
+	translate([200,110.8,0]) rotate([0,0,180]) pi4_mount();
+	//translate([142.5,48.8,0]) color("red") cube([5,89.2,5]); // measure for the 26 pin connector location
+	pi4_support();
 	if(Cover) translate([-5,-20,0]) portcover(3,89,PlatformThickness+1,Width,Length,HoleOffset);
 	if(Blower) translate([-5,-55,0]) blower_adapter(20,15,48,0);
 	if(Cover) spacer(2,Thickness,screw3,20,30,0); // put them in one of the vent holes
@@ -204,15 +209,15 @@ module duex4() {
 
 ///////////////////////////////////////////////////////////////////////
 
-module fanmountside(Screw=YesInsert3mm()) { // on side of platform
-	color("white") cylinder(h=GetHoleLen(),d=YesInsert3mm());
-	translate([0,FanPlatformMountOffset,0]) color("red") cylinder(h=GetHoleLen(),d=YesInsert3mm());
+module fanmountside(Screw=Yes3mmInsert()) { // on side of platform
+	color("white") cylinder(h=GetHoleLen3mm(),d=Yes3mmInsert());
+	translate([0,FanPlatformMountOffset,0]) color("red") cylinder(h=GetHoleLen3mm(),d=Yes3mmInsert());
 }
 
 ////////////////////////////////////////////////////////////////////////
-module fanmountplatform(Screw=YesInsert3mm()) {
-	cylinder(h=GetHoleLen(),d=Screw);
-	translate([FanPlatformMountOffset,0,0]) cylinder(h=GetHoleLen(),d=Screw);
+module fanmountplatform(Screw=Yes3mmInsert()) {
+	cylinder(h=GetHoleLen3mm(),d=Screw);
+	translate([FanPlatformMountOffset,0,0]) cylinder(h=GetHoleLen3mm(),d=Screw);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -231,15 +236,15 @@ module spacer(Quanity=1,Thickness,Screw=screw3,X=0,Y=0,Z=0) { // spacer to move 
 module platform(Side_fan = 0,over = 0) { // main platform
 	difference() {
 		translate([-5,-7,0]) color("cyan") cubeX([D085Width+10,D085Length+MountThickness+7,PlatformThickness],2);
-		translate([D085HoleOffset,D085HoleOffset-1,-1]) color("red") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([D085Width-D085HoleOffset,D085HoleOffset-1,-1]) color("white") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([D085Width-D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("gray") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+		translate([D085HoleOffset,D085HoleOffset-1,-1]) color("red") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([D085Width-D085HoleOffset,D085HoleOffset-1,-1]) color("white") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([D085Width-D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("gray") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 		vents(over);
-		translate([0,GetHoleLen(YesInsert3mm())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+		translate([0,GetHoleLen3mm(Yes3mmInsert())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 		if(Side_fan) {
-			translate([-10,D085Length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(YesInsert3mm());
-			translate([D085Width-16,D085Length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(YesInsert3mm());
+			translate([-10,D085Length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(Yes3mmInsert());
+			translate([D085Width-16,D085Length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(Yes3mmInsert());
 		}
 	}
 }
@@ -249,12 +254,12 @@ module platform(Side_fan = 0,over = 0) { // main platform
 module platform3(Width,Length,HoleOffset) { // main platform
 	difference() {
 		translate([-5,-7,0]) color("cyan") cubeX([Width+10,Length+MountThickness+7,PlatformThickness],2);
-		translate([HoleOffset,HoleOffset-1,-1]) color("red") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([Width-HoleOffset,HoleOffset-1,-1]) color("white") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([Width-HoleOffset,Length-HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([HoleOffset,Length-HoleOffset+0.5,-1]) color("gray") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+		translate([HoleOffset,HoleOffset-1,-1]) color("red") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([Width-HoleOffset,HoleOffset-1,-1]) color("white") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([Width-HoleOffset,Length-HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([HoleOffset,Length-HoleOffset+0.5,-1]) color("gray") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 		vents3();
-		translate([0,GetHoleLen(YesInsert3mm())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+		translate([0,GetHoleLen3mm(Yes3mmInsert())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 	}
 }
 
@@ -263,15 +268,15 @@ module platform3(Width,Length,HoleOffset) { // main platform
 module platform4(Side_fan = 0) { // main platform
 	difference() {
 		translate([-5,-5,0]) color("cyan") cubeX([DueX4Width+10,DueX4length+MountThickness+5,PlatformThickness]);
-		translate([DueX4HoleOffset1,DueX4HoleOffset1,-1]) color("red") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([DueX4Width-DueX4HoleOffset3,DueX4HoleOffset2,-1]) color("white") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([DueX4Width-DueX4HoleOffset3,DueX4length-DueX4HoleOffset2+2,-1]) color("blue") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
-		translate([DueX4HoleOffset1,DueX4length-DueX4HoleOffset1+2,-1]) color("gray") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+		translate([DueX4HoleOffset1,DueX4HoleOffset1,-1]) color("red") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([DueX4Width-DueX4HoleOffset3,DueX4HoleOffset2,-1]) color("white") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([DueX4Width-DueX4HoleOffset3,DueX4length-DueX4HoleOffset2+2,-1]) color("blue") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
+		translate([DueX4HoleOffset1,DueX4length-DueX4HoleOffset1+2,-1]) color("gray") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 		vents4();
-		translate([DueDueX4Width/2,GetHoleLen(YesInsert3mm()),PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+		translate([DueDueX4Width/2,GetHoleLen3mm(Yes3mmInsert()),PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 		if(Side_fan) {
-			translate([-10,DueX4length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(YesInsert3mm());
-			translate([DueDueX4Width-16,DueX4length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(YesInsert3mm());
+			translate([-10,DueX4length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(Yes3mmInsert());
+			translate([DueDueX4Width-16,DueX4length/2-FanPlatformMountOffset/2,PlatformThickness/2]) rotate([0,90,0]) fanmountside(Yes3mmInsert());
 		}
 	}
 }
@@ -388,10 +393,10 @@ module supports(over = 0, FanNotch=0) { // connects & support main platform
 		fanonsupportleveler(FanNotch);
 		difference() {
 			translate([0.5,7,-PortCoverHeight+SupportThickness]) rotate([7,0,0]) color("cyan") cubeX([SupportThickness,D085Length,PortCoverHeight],2);
-			translate([4,4,-1]) color("red") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+			translate([4,4,-1]) color("red") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 			translate([-1,3,-SupportThickness-19]) color("white") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
-			translate([0,GetHoleLen(YesInsert3mm())+5,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
-			translate([D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*4,d=YesInsert3mm());
+			translate([0,GetHoleLen3mm(Yes3mmInsert())+5,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
+			translate([D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("blue") cylinder(h=PlatformThickness*4,d=Yes3mmInsert());
 			translate([0,D085Length+4,0]) color("gray") cube([D085Width,10,PortCoverHeight+10]);
 			fanonsupport(FanNotch);
 			fanonsupportnotch(FanNotch);
@@ -399,16 +404,16 @@ module supports(over = 0, FanNotch=0) { // connects & support main platform
 		difference() {
 			translate([D085Width-SupportThickness-0.5,7,-PortCoverHeight+SupportThickness]) rotate([7,0,0])
 				color("gray") cubeX([MountThickness,D085Length,PortCoverHeight],2);
-			translate([D085Width-4,4,-1]) color("cyan") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+			translate([D085Width-4,4,-1]) color("cyan") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 			translate([D085Width-SupportThickness-1,3,-SupportThickness-19]) color("red") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
-			translate([D085Width-D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("white") cylinder(h=PlatformThickness*4,d=YesInsert3mm());
+			translate([D085Width-D085HoleOffset,D085Length-D085HoleOffset+0.5,-1]) color("white") cylinder(h=PlatformThickness*4,d=Yes3mmInsert());
 			translate([0,D085Length+4,0]) color("pink") cube([D085Width,10,PortCoverHeight+10]);
 		}
 		difference() {
 			translate([D085Width/3-SupportThickness/2,7,-PortCoverHeight+SupportThickness]) rotate([7,0,0])
 				color("blue") cubeX([MountThickness,D085Length,PortCoverHeight],2);
 			translate([D085Width/3-SupportThickness/2-1,3,-SupportThickness-19]) color("red") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
-			translate([0,GetHoleLen(YesInsert3mm())+5,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+			translate([0,GetHoleLen3mm(Yes3mmInsert())+5,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 			translate([0,D085Length+4,0]) color("white") cube([D085Width,10,PortCoverHeight+10]);
 			fanonsupportnotch(FanNotch);
 		}
@@ -423,7 +428,7 @@ module supports(over = 0, FanNotch=0) { // connects & support main platform
 		difference() {
 			translate([0.5,29,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 				color("pink") cubeX([SupportThickness,D085Length-20,PortCoverHeight+PlatformThickness],2);
-			translate([0,GetHoleLen(YesInsert3mm())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+			translate([0,GetHoleLen3mm(Yes3mmInsert())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 			translate([-2,3,-SupportThickness-19]) color("cyan") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
 			translate([0,D085Length+4,0]) color("white") cube([D085Width,10,PortCoverHeight+10]);
 			fanonsupport(FanNotch);
@@ -438,7 +443,7 @@ module supports(over = 0, FanNotch=0) { // connects & support main platform
 		difference() {
 			translate([D085Width/3-SupportThickness/2,29,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 				color("blue") cubeX([MountThickness,D085Length-20,PortCoverHeight+PlatformThickness],2);
-			translate([0,GetHoleLen(YesInsert3mm())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+			translate([0,GetHoleLen3mm(Yes3mmInsert())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 			translate([D085Width/3-SupportThickness/2-1,3,-SupportThickness-19]) color("white") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
 			translate([0,D085Length+4,0]) color("red") cube([D085Width,10,PortCoverHeight+10]);
 			fanonsupportnotch(FanNotch);
@@ -459,7 +464,7 @@ module supports3(Width,Length,HoleOffset) { // connects & support main platform
 	difference() {
 		translate([0.5,19,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 			color("pink") cubeX([SupportThickness,Length-10,PortCoverHeight+PlatformThickness],2);
-		translate([0,GetHoleLen(YesInsert3mm())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+		translate([0,GetHoleLen3mm(Yes3mmInsert())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 		translate([-2,3,-SupportThickness-19]) color("cyan") cube([MountThickness+5,D085Length+5,PortCoverHeight+5]);
 		translate([-5,Length+4.8,0]) color("white") cube([Width+10,10,PortCoverHeight+10]);
 	}
@@ -472,7 +477,7 @@ module supports3(Width,Length,HoleOffset) { // connects & support main platform
 	difference() {
 		translate([Width/3-SupportThickness/2,19,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 			color("blue") cubeX([MountThickness,Length-10,PortCoverHeight+PlatformThickness],2);
-		translate([0,GetHoleLen(YesInsert3mm())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(YesInsert3mm());
+		translate([0,GetHoleLen3mm(Yes3mmInsert())+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 		translate([Width/3-SupportThickness/2-1,3,-SupportThickness-19]) color("white") cube([MountThickness+5,Length+5,PortCoverHeight+5]);
 		translate([-5,Length+4.8,0]) color("red") cube([Width+10,10,PortCoverHeight+10]);
 	}
@@ -488,9 +493,9 @@ module supports3(Width,Length,HoleOffset) { // connects & support main platform
 
 module fanonsupport(NotchIt=0) {
 	if(NotchIt != 2) {
-		translate([3,D085Length-(D085Length/2),-5]) color("red") cylinder(h=GetHoleLen(YesInsert3mm())+5,d=YesInsert3mm());
+		translate([3,D085Length-(D085Length/2),-5]) color("red") cylinder(h=GetHoleLen3mm(Yes3mmInsert())+5,d=Yes3mmInsert());
 		translate([3,FanMountOffset+D085Length-(D085Length/2),-5])
-			color("white") cylinder(h=GetHoleLen(YesInsert3mm())+5,d=YesInsert3mm());
+			color("white") cylinder(h=GetHoleLen3mm(Yes3mmInsert())+5,d=Yes3mmInsert());
 	}
 }
 
@@ -499,8 +504,8 @@ module fanonsupport(NotchIt=0) {
 module fanonsupportleveler(NotchIt=0) {
 	if(NotchIt==0) {
 		difference() {
-			translate([3,D085Length-(D085Length/2),0]) color("red") cylinder(h=GetHoleLen(YesInsert3mm())-5,d=YesInsert3mm);
-			translate([3,D085Length-(D085Length/2),-5]) color("blue") cylinder(h=GetHoleLen(YesInsert3mm())+5,d=YesInsert3mm);
+			translate([3,D085Length-(D085Length/2),0]) color("red") cylinder(h=GetHoleLen3mm(Yes3mmInsert())-5,d=YesInsert3mm);
+			translate([3,D085Length-(D085Length/2),-5]) color("blue") cylinder(h=GetHoleLen3mm(Yes3mmInsert())+5,d=YesInsert3mm);
 		}
 	}
 }
@@ -518,19 +523,24 @@ module fanonsupportnotch(NotchIt=0) {
 
 module supports4() { // connects & support main platform
 	difference() {
-		translate([0,5,-PortCoverHeight+SupportThickness]) rotate([7,0,0]) color("red") cubeX([SupportThickness,DueX4length,PortCoverHeight],2);
-		translate([4,4,-1]) color("white") cylinder(h=PlatformThickness*2,d=YesInsert3mm());
+		translate([0,5,-PortCoverHeight+SupportThickness]) rotate([7,0,0])
+			color("red") cubeX([SupportThickness,DueX4length,PortCoverHeight],2);
+		translate([4,4,-1]) color("white") cylinder(h=PlatformThickness*2,d=Yes3mmInsert());
 		translate([-1,3,-SupportThickness-19]) color("blue") cube([MountThickness+5,DueX4length+5,PortCoverHeight+5]);
-		translate([D085HoleOffset,DueX4length-D085HoleOffset+2,-1]) color("black") cylinder(h=PlatformThickness*4,d=YesInsert3mm());
+		translate([D085HoleOffset,DueX4length-D085HoleOffset+2,-1])
+			color("black") cylinder(h=PlatformThickness*4,d=Yes3mmInsert());
 	}
 	difference() {
-		translate([DueX4Width-SupportThickness,5,-PortCoverHeight+SupportThickness]) rotate([7,0,0]) color("cyan") cubeX([MountThickness,DueX4length,PortCoverHeight],2);
-		translate([DueX4Width-SupportThickness-1,3,-SupportThickness-19]) color("salmon") cube([MountThickness+5,DueX4length+5,PortCoverHeight+5]);
+		translate([DueX4Width-SupportThickness,5,-PortCoverHeight+SupportThickness]) rotate([7,0,0])
+			color("cyan") cubeX([MountThickness,DueX4length,PortCoverHeight],2);
+		translate([DueX4Width-SupportThickness-1,3,-SupportThickness-19]) color("salmon")
+			cube([MountThickness+5,DueX4length+5,PortCoverHeight+5]);
 	}
 	difference() {
 		translate([DueX4Width/2-SupportThickness/2,5,-PortCoverHeight+SupportThickness]) rotate([7,0,0])
 			color("aqua") cubeX([MountThickness,D085Length,PortCoverHeight],2);
-		translate([DueX4Width/2-SupportThickness/2-1,3,-SupportThickness-19]) color("pink") cube([MountThickness+5,DueX4length+5,PortCoverHeight+5]);
+		translate([DueX4Width/2-SupportThickness/2-1,3,-SupportThickness-19]) color("pink")
+			cube([MountThickness+5,DueX4length+5,PortCoverHeight+5]);
 	}
 }
 
@@ -710,14 +720,49 @@ module blower_adapter(blower_h,blower_w,blower_m_dist,ShiftUp=0) { // to use a 5
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+pi4width=56;
+pi4length=85;
+pi4rail=10;
+pi4s1off=3.5;
+pi4s2off=pi4s1off+58;
+pi4s3off=3.5;
+pi4s4off=pi4s3off+58;
 
-function GetHoleLen(Screw) = (Screw==screw3in) ? screw3inl*2.5 : 25;
+module pi4_mount() {
+	difference() {
+		pi4_base();
+		translate([pi4s1off,pi4s1off,-1]) color("white") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert(),$fn=100);
+		translate([pi4s1off,pi4s2off,-1]) color("black") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert(),$fn=100);
+		translate([pi4width-pi4s3off,pi4s3off,-1]) color("gray") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert(),$fn=100);
+		translate([pi4width-pi4s3off,pi4s4off,-1]) color("red") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert(),$fn=100);
+	}
+	spacer(4,PCSpacerThickness,screw3,78,12,0);
+}
 
-//function YesInsert() = (Use3mmInsert==1) ? screw3in : screw3;
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function YesInsert3mm() = (Use3mmInsert==1) ? screw3in : screw3;
+module pi4_base() {
+	//color("gold") cubeX([pi4width,pi4length,MountThickness],2);
+	color("cyan") cubeX([pi4width,pi4rail,MountThickness],2);
+	translate([0,pi4length-pi4rail,0]) color("blue") cubeX([pi4width,pi4rail,MountThickness],2);
+	color("yellow") cubeX([pi4rail,pi4length,MountThickness],2);
+	translate([pi4width-pi4rail,0,0]) color("purple") cubeX([pi4rail,pi4length,MountThickness],2);
+	// crossmembers
+	translate([pi4rail,0,0]) color("pink") rotate([0,0,60]) cubeX([pi4width+33,pi4rail,MountThickness],2);
+	translate([2,pi4length-pi4rail+2,0]) color("lightgray") rotate([0,0,-60]) cubeX([pi4width+33,pi4rail,MountThickness],2);
+}
 
-//function YesInsert4mm() = (Use4mmInsert==1) ? screw4in : screw4;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module pi4_support() {
+	translate([142.5,54,0]) color("red") cube([5,50,MountThickness]);
+	translate([142.5,27,0]) color("blue") cube([5,18,MountThickness]);
+	difference() {
+		translate([138,67,-6]) rotate([0,7,0])	color("pink") cubeX([pi4width+3,MountThickness,20],2);
+		translate([135,65,-18]) color("salmon") cube([pi4width+10,MountThickness+5,20]);
+	}
+
+}
 
 //////////////////// end of duet2020.scad ////////////////////////////////////////////////////////////
