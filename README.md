@@ -1,9 +1,7 @@
 # Duet_Mount
-Duet 085 is in duet2020v0.2.scad and duet2020v0.3.scad
+Duet 085, 2 Wifi & Ethernet, DueX2 and DueX5 is in both
 
-Duet 2 Wifi & Ethernet, DueX2 and DueX5 is in duetv0.2.scad and duet2020v0.3.scad 
-
-Duet 3 is in duet2020v0.3.scad
+Duet 3 6HC is in "duet2020 for Duet085-2-3 and PI.scad"
 
 
 https://creativecommons.org/licenses/by-nc/3.0/
