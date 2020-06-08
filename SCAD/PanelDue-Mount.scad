@@ -2,7 +2,7 @@
 // PanelDue-Mount.scad - something simple to hold dc42's PanelDue case to 2020
 ///////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 4/21/20
+// last update 6/5/20
 ///////////////////////////////////////////////////////////////////////////////////////
 // 8/4/16	- changed bracket to take args for size of paneldue case
 // 8/13/16	- width of bracket now based on depth of PanelDue case
@@ -10,10 +10,13 @@
 // 9/3/16	- Added param to select mounting holes in bracket()
 // 9/11/16	- Can now tilt bracket if Rt is 0
 // 12/17/18	- Added color to preview
-// 4/21/20	- Added another tab for streangth
+// 4/21/20	- Added another tab for strength
+// 6/5/20	- Added use of a brass insert
 ///////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad>
+Use3mmInsert=1;
+include <brassfunctions.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
 clearance = 2;	// amount needed to let the case slide in
@@ -22,10 +25,9 @@ thickness = 7;	// thickness of the bracket
 
 //bracket(31,89.5);				// for a 4.3" PanelDue
 //bracket(33,124);				// for a 7" PanelDue
-//tabbedbracket(31,89.5,20,0);	// 3rd arg is length of mounting tab, 4th arg is rotate 90 degrees
+//tabbedbracket(0,31,89.5,20,0);	// 3rd arg is length of mounting tab, 4th arg is rotate 90 degrees
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
-//tabbedbracket(33,124,20,0);		// for a 7" PanelDue at the bottom 2020 of the printer
-tabbedbracket(33,124,60,0);	// for a 7" PanelDue at the top 2040 of the printer
+tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,21 +60,43 @@ module mountingholes(p_depth,p_height) { // flat mounting
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module clampingscrew(p_depth,p_height) {
-	translate([-2,(p_depth+clearance)/2+thickness,p_depth/2]) rotate([0,90,0]) color("plum") cylinder(h=300,d=screw3t);
+	translate([-2,(p_depth+clearance)/2+thickness,p_depth/2]) rotate([0,90,0]) color("plum") cylinder(h=300,d=Yes3mmInsert());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-module tabbedbracket(p_depth,p_height,m_depth,Rt,Angle=30) {
+module tabbedbracket(Type=0,p_depth,p_height,m_depth,Rt,Angle=30) {
 	// add a tab for horizontal 2020 mount with the PanelDue above
 	bracket(p_depth,p_height,0);
 	if(Rt)
 		translate([0,p_depth,0]) rotate([90,0,0]) thetab(p_depth,p_height,m_depth);
-	else {
+	if(Type==0) {
 		%translate([-59,-29,-2]) rotate([0,0,Angle]) cube([20,20,40]);
 		translate([5,0,0]) rotate([0,0,Angle]) thetab(p_depth,p_height,m_depth+5);
 		translate([-8.5,19.5+thickness/2,0]) rotate([0,0,Angle]) thetab(p_depth,p_height,m_depth+5);
-		translate([-10,18.63+thickness/2,0]) rotate([0,0,Angle]) cubeX([20,thickness,p_depth],2);
+		translate([-10,18.63+thickness/2,0]) rotate([0,0,Angle]) color("pink") cubeX([20,thickness,p_depth],2);
+	}
+	if(Type==1) {
+		rotate([0,0,Angle]) {
+			%translate([-56,0+thickness,-2]) cube([20,20,40]);
+			translate([5,0,0]) thetab(p_depth,p_height,m_depth+5);
+			difference() {
+				translate([-36,0+thickness/2,0]) color("pink") cubeX([thickness,25,p_depth],2);
+				translate([-45,thickness+10,7]) rotate([0,90,0]) color("black") cylinder(h=thickness*3,d=screw5);
+				translate([-45,thickness+10,25]) rotate([0,90,0]) color("white") cylinder(h=thickness*3,d=screw5);
+			}
+		}
+	}
+	if(Type==2) {
+		rotate([0,0,Angle]) {
+			%translate([-56,-20,-2]) cube([20,20,40]);
+			translate([5,0,0]) thetab(p_depth,p_height,m_depth+5);
+			translate([0,-p_depth+thickness*2,0]) difference() {
+				translate([-36,thickness/2-2.5]) color("pink") cubeX([thickness,25,p_depth],2);
+				translate([-45,9,7]) rotate([0,90,0]) color("black") cylinder(h=thickness*3,d=screw5);
+				translate([-45,9,25]) rotate([0,90,0]) color("white") cylinder(h=thickness*3,d=screw5);
+			}
+		}
 	}
 }
 
