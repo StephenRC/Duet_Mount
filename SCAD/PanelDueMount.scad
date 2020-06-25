@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////
-// PanelDue-Mount.scad - something simple to hold dc42's PanelDue case to 2020
+// PanelDueMount.scad - something simple to hold dc42's PanelDue case to 2020 and my PI Touchscreen case
 ///////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 6/5/20
+// last update 6/20/20
 ///////////////////////////////////////////////////////////////////////////////////////
 // 8/4/16	- changed bracket to take args for size of paneldue case
 // 8/13/16	- width of bracket now based on depth of PanelDue case
@@ -21,6 +21,14 @@ $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
 clearance = 2;	// amount needed to let the case slide in
 thickness = 7;	// thickness of the bracket
+//----------------------------------------------------------------------------------------------------------
+// From: https://www.raspberrypi.org/documentation/hardware/display/  Scroll to bottom for the drawing
+// Some dimensions are rounded up
+TSSScreenLeftOffset=11.8;
+TSScrewHOffset=126.2;
+TSScrewVOffset=65.5;
+TSScrewTopOffset=21.58;
+TSScrewLeftOffset=20;
 ///////////////////////////////////////////////////////////////////////////////////////
 
 //bracket(31,89.5);				// for a 4.3" PanelDue
@@ -28,6 +36,7 @@ thickness = 7;	// thickness of the bracket
 //tabbedbracket(0,31,89.5,20,0);	// 3rd arg is length of mounting tab, 4th arg is rotate 90 degrees
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
 tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
+
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,14 +109,12 @@ module tabbedbracket(Type=0,p_depth,p_height,m_depth,Rt,Angle=30) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
-module thetab(p_de,p_he,m_de) {
+module thetab(p_de,p_he,m_de,Thickness=thickness) {
 	difference() {
-		translate([-m_de+4,0,0]) color("blue") cubeX([m_de,thickness,p_de],2);
-		translate([-m_de+12,10,7]) rotate([90,0,0]) color("white") cylinder(h=thickness*2,d=screw5);
+		translate([-m_de+4,0,0]) color("blue") cubeX([m_de,Thickness,p_de],2);
+		translate([-m_de+12,10,7]) rotate([90,0,0]) color("white") cylinder(h=Thickness*2,d=screw5);
 		//translate([-m_de+12,thickness*2+5,7]) rotate([90,0,0]) color("gray") cylinder(h=thickness*2,d=screw5hd);
-		translate([-m_de+12,10,p_de-7]) rotate([90,0,0]) color("gold") cylinder(h=thickness*2,d=screw5);
+		translate([-m_de+12,10,p_de-7]) rotate([90,0,0]) color("gold") cylinder(h=Thickness*2,d=screw5);
 		//translate([-m_depth+12,thickness*2+5,p_depth-7]) rotate([90,0,0]) color("black") cylinder(h=thickness*2,d=screw5hd);
 	}
 }
