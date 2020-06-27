@@ -69,9 +69,12 @@ pi4s4off=pi4s3off+58;
 																// arg6=blower adapter, arg7=move 2020 holes up/down
 																// arg8=makerslide alignment tab
 																// arg9=PI mount : 0-none; 1-attached, 2=seperate
-//PI7Touchscreen(1);
-PICaseAccessCover(0); // 0 : Mounting brackets; 1 : no mounting brackets
-//Spacer(4,TSDepth-TSScreenThicknessFull-ScreenBaseThickness);
+//PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
+//PI7TouchscreenV2(0);  // has corner edges around screen
+//PICaseAccessCover(0);
+//translate([21,12,-3])
+	PICaseAccessCover(0); // test fit
+//translate([171,97,-3]) rotate([0,0,180]) PICaseAccessCover(0); // test fit
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -424,13 +427,13 @@ module pi4_support() {
 //-----------------------------------------------------------------------------------------------------------------
 TSScreenNutBump=2.5;
 TSScreenThicknessFull=5.96+TSScreenNutBump;
+TSScreenThickness=1.5;
 TSScreenStiffner=1.4;
 TSSScreenLeftOffset=11.8;
 TSSScreenRigthOffset=15.1;
 TSWidth=194;
 TSLength=112;
 TSCornerRadius=7.86;
-TSScreenThickness=1.5;
 TSPIScrewLeftOffset=48.45+12.54;
 TSScrewHOffset=126.2;
 TSScrewVOffset=65.65;
@@ -446,11 +449,22 @@ ScreenBaseThickness=3;
 
 module PI7Touchscreen(Test=0) {
 	PIScreenBase(Test);
+	Frame(TSDepth,Test);
+	translate([TSScrewLeftOffset,TSScrewTopOffset,0])
+		ScreenSpacer(TSDepth-TSScreenThicknessFull-ScreenBaseThickness);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module PI7TouchscreenV2(Test=0) {
+	PIScreenBaseV2(Test,TSDepth-TSScreenThickness+TSScreenThickness);
 	difference() {
-		Frame(TSDepth,Test);
+		Frame(TSDepth+TSScreenThickness,Test);
 		translate([-2,-2,TSDepth-TSScreenThickness]) Screen(TSScreenThickness);
 	}
-	translate([TSScrewLeftOffset,TSScrewTopOffset,0]) ScreenSpacer(TSDepth-TSScreenThicknessFull-ScreenBaseThickness);
+	translate([TSScrewLeftOffset,TSScrewTopOffset,0])
+		ScreenSpacer(TSDepth-TSScreenThicknessFull-ScreenBaseThickness+TSScreenThickness);
+	//echo(TSDepth-TSScreenThicknessFull-ScreenBaseThickness+TSScreenThickness);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -467,6 +481,8 @@ module Screen(Thickness=TSScreenThickness,Test=0) {
 	}
 }
 
+	//	translate([-2,-2,TSDepth-TSScreenThickness]) Screen(TSScreenThickness);
+	//}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module PIScreenBase(Test=0) {
@@ -482,17 +498,48 @@ module PIScreenBase(Test=0) {
 	if(Test) {
 		translate([15,75,3]) printchar("Top Left",5);
 		translate([150,75,3]) printchar("Top Right",5);
+	} else {
+		translate([152,55,3]) printchar("Screen to PI",5);
+		translate([120,20,3]) printchar("Power",5);
 	}
 	ScreenDepthStop();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module PIScreenBaseV2(Test=0,Depth=TSDepth-TSScreenThickness) {
+	difference() {
+		translate([-2,-2,0]) color("cyan") cubeX([TSWidth,TSLength,ScreenBaseThickness],1);
+		if(Test) { // shorten print time for testing
+			translate([45,TSLength/2-60,-5]) color("khaki") cubeX([100,200,15],2);
+		} else {
+			translate([40,TSLength/2-25,-5]) color("khaki") cubeX([110,50,15],2);
+		}
+		translate([TSScrewLeftOffset,TSScrewTopOffset,0]) TSMountScrews();
+	}
+	if(Test) {
+		translate([15,75,3]) printchar("Top Left",5);
+		translate([150,75,3]) printchar("Top Right",5);
+	} else {
+		translate([152,55,3]) printchar("Screen to PI",5);
+		translate([120,20,3]) printchar("Power",5);
+	}
+	ScreenDepthStop(Depth);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module ScreenDepthStop() {
-	translate([-2,0,0]) color("red") cubeX([6,8,TSDepth-TSScreenThickness-TSScreenStiffner],1); // bottom left
-	translate([TSWidth-8,0,0]) color("cyan") cubeX([6,8,TSDepth-TSScreenThickness],1); // bottom right
-	translate([TSWidth-8,TSLength-12,0])  color("blue") cubeX([6,8,TSDepth-TSScreenThickness],1); // top right
-	translate([-2,TSLength-12,0])color("black") cubeX([6,8,TSDepth-TSScreenThickness-TSScreenStiffner],1); // top left
+module ScreenDepthStop(Depth=TSDepth-TSScreenThickness) {
+	//echo(TSDepth-TSScreenThickness);
+	difference() {
+		union() {
+			translate([-3,-2,0]) color("red") cubeX([6,8,Depth],1); // bottom left
+			translate([TSWidth-7,-1.9,0]) color("plum") cubeX([6,8,Depth],1); // bottom right
+			translate([TSWidth-7,TSLength-10,0])  color("blue") cubeX([6,8,Depth],1); // top right
+			translate([-3,TSLength-10,0])color("black") cubeX([6,8,Depth],1); // top left
+		}
+		translate([-2,-2,TSDepth-TSScreenThickness]) Screen(TSScreenThickness);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -507,6 +554,7 @@ module TSMountScrews(Screw=Yes3mmInsert()) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module ScreenSpacer(Thickness=TSDepth,Screw=screw3) {
+	//echo(Thickness);
 	translate([TSScrew1,TSScrew1,0]) color("blue") Spacer(1,Thickness,Screw);
 	translate([TSScrew1,TSScrew2,0]) color("purple") Spacer(1,Thickness,Screw);
 	translate([TSScrew1+TSScrewHOffset,TSScrew2,0]) color("red") Spacer(1,Thickness,Screw);
@@ -543,21 +591,21 @@ module ScreenCorner(Thickness=10) {
 module PICaseAccessCover(Mounting=0) {
 	difference() {
 		union() {
-			color("cyan") cubeX([150,85,3],2);
+			color("cyan") cubeX([146,85,3],2);
 			if(Mounting==0) {
 				difference() {
-					translate([22,-4,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
+					translate([20,-15,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
 					translate([0,80,-2]) color("red") cube([30,50,8]);
 				}
 				difference() {
-					translate([148.2,-4,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
+					translate([145.9,-15,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
 					translate([124,80,-2]) color("plum") cube([30,50,8]);
 				}
 			}
 		}
 		translate([TSScrewLeftOffset-20.5,TSScrewTopOffset-12,0]) {
-		translate([0,0,0]) TSMountScrews(screw3);
-		translate([0,0,7]) TSCoverMountHolesCS();
+		translate([-2.5,0,0]) TSMountScrews(screw3);
+		translate([-2.5,0,7]) TSCoverMountHolesCS();
 		translate([50,20,-5]) color("black") cubeX([30,30,10],2);
 		}
 	}
@@ -567,13 +615,24 @@ module PICaseAccessCover(Mounting=0) {
 
 module Frame(Depth=TSDepth,Test=0) {
 	if(!Test) {
-		translate([-3,-2,0]) color("blue") cubeX([TSWidth+2,3,Depth],1);
-		translate([-3,TSLength-5,0]) color("red") cubeX([TSWidth+2,3,Depth],1);
-		translate([-3,0,0])color("black") cubeX([3,TSLength-3,Depth],1);
-		translate([TSWidth-3,-2,0]) color("gray") cubeX([3,TSLength,Depth],1);
-	} else {
-		translate([-2,0,0]) color("black") cubeX([3,TSLength-3,Depth],1);
+		translate([-3,-2,0]) color("blue") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+		translate([-3,TSLength-5,0]) color("red") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+		translate([-3,-2,0])color("black") cubeX([3,TSLength,Depth-TSScreenThickness],1);
+		translate([TSWidth-3,-2,0]) color("gray") cubeX([3,TSLength,Depth-TSScreenThickness],1);
 	}
+	if(Test==1) {
+		translate([-2,0,0]) color("black") cubeX([3,TSLength-3,Depth-TSScreenThickness],1);
+	}
+	if(Test==2) {
+		translate([-3,-2,0]) color("blue") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+	}
+	if(Test==3) {
+		translate([-3,TSLength-5,0]) color("red") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+	}
+	if(Test==4) {
+		translate([TSWidth-3,-2,0]) color("gray") cubeX([3,TSLength,Depth-TSScreenThickness],1);
+	}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

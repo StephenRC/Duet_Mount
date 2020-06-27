@@ -53,8 +53,8 @@ module PITabbedBracket(p_depth,p_height,m_depth,Rt,Angle=30) {
 module BracketPI(p_height) {	// 1st arg: depth, 2nd arg: height
 	difference() {
 		color("lightgray") cubeX([p_height+clearance+thickness*2+5,5,20],2);
-		translate([15,3,10]) rotate([90,90,0]) MountHoles();
-		translate([-6.6,0,54.5]) rotate([90,90,0]) MountCSHoles();
+		translate([25,3,10]) rotate([90,90,0]) MountHoles();
+		translate([3.5,0,54.5]) rotate([90,90,0]) MountCSHoles();
 	}
 }
 
@@ -109,9 +109,9 @@ module TSMountScrews(Screw=Yes3mmInsert()) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module MountCSHoles() {
-	translate([TSScrewLeftOffset+TSSScreenLeftOffset,TSScrewTopOffset,-1]) color("cyan") cylinder(h=5,d=screw3hd);
-	translate([TSScrewLeftOffset+TSSScreenLeftOffset,TSScrewTopOffset+TSScrewVOffset,-1]) color("red") cylinder(h=5,d=screw3hd);
+module MountCSHoles(Screw=screw3hd) {
+	translate([TSScrewLeftOffset+TSSScreenLeftOffset,TSScrewTopOffset,-1]) color("cyan") cylinder(h=5,d=Screw+0.5);
+	translate([TSScrewLeftOffset+TSSScreenLeftOffset,TSScrewTopOffset+TSScrewVOffset,-1]) color("red") cylinder(h=5,d=Screw+0.5);
 }
 
 /////////////////// end of panelduemount.scad ////////////////////////////////////////
