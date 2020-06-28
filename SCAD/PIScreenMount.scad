@@ -36,12 +36,12 @@ TSScrewTopOffset=21.58;
 TSScrewLeftOffset=20+12.54;
 ///////////////////////////////////////////////////////////////////////////////////////
 
-PITabbedBracket(30,113,60,0);		// for a 7" PI Touchscreen on a 2040
+PITabbedBracket(1,30,90,60,0);		// for a 7" PI Touchscreen on a 2040
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-module PITabbedBracket(p_depth,p_height,m_depth,Rt,Angle=30) {
-	translate([-1,0,0]) BracketPI(p_height);
+module PITabbedBracket(MountHoles=1,p_depth,p_height,m_depth,Rt,Angle=30) {
+	translate([-1,0,0]) BracketPI(p_height,MountHoles);
 	translate([-5,-3,0]) rotate([0,0,Angle]) {
 		translate([-56,-20,-2]) Sample2020();
 		translate([5,0,0]) PITab(p_depth,p_height,m_depth+3,5);
@@ -50,11 +50,13 @@ module PITabbedBracket(p_depth,p_height,m_depth,Rt,Angle=30) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module BracketPI(p_height) {	// 1st arg: depth, 2nd arg: height
+module BracketPI(p_height,MountHoles=1) {	// 1st arg: depth, 2nd arg: height
 	difference() {
 		color("lightgray") cubeX([p_height+clearance+thickness*2+5,5,20],2);
-		translate([25,3,10]) rotate([90,90,0]) MountHoles();
-		translate([3.5,0,54.5]) rotate([90,90,0]) MountCSHoles();
+		if(MountHoles) {
+			translate([25,3,10]) rotate([90,90,0]) MountHoles();
+			translate([3.5,0,54.5]) rotate([90,90,0]) MountCSHoles();
+		}
 	}
 }
 

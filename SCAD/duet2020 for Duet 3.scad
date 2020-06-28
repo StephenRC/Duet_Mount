@@ -26,6 +26,7 @@
 //		  The mounting holes on the PI 4 can be drilled out to 3mm with no problems
 //		  The mounting screws holding the pi screen access cover also hold the touchscreen, make sure they are not too long
 //		  The touchscreen mounts using the same mount at the pi board does
+//		  Touchscreen case uses M3x25mm to mount with the access cover mount
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // includes
 include <inc/screwsizes.scad>
@@ -70,11 +71,10 @@ pi4s4off=pi4s3off+58;
 																// arg8=makerslide alignment tab
 																// arg9=PI mount : 0-none; 1-attached, 2=seperate
 //PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
-//PI7TouchscreenV2(0);  // has corner edges around screen
+PI7TouchscreenV2(0);  // has corner edges around screen
 //PICaseAccessCover(0);
-//translate([21,12,-3])
-	PICaseAccessCover(0); // test fit
-//translate([171,97,-3]) rotate([0,0,180]) PICaseAccessCover(0); // test fit
+//translate([21,12,-3])	PICaseAccessCover(0); // to test fit
+//translate([171,97,-3]) rotate([0,0,180]) PICaseAccessCover(0); // to test fit
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -441,8 +441,10 @@ TSScrew1=0;
 TSScrew2=TSScrew1+TSScrewVOffset;
 TSScrew3=0;
 TSScrew4=TSScrew3+TSScrewHOffset;
-TSScrewTopOffset=21.58; // 100.6-TSScrewVOffset-21.58;
-TSScrewLeftOffset=20+12.54; // 166.2-TSScrewHOffset-(20+6.663);
+AdjustY=1.5; // fine tune the screen mounting
+AdjustX=2.5; // fine tune the screen mounting
+TSScrewTopOffset=21.58+AdjustY; // 100.6-TSScrewVOffset-21.58;
+TSScrewLeftOffset=20+12.54+AdjustX; // 166.2-TSScrewHOffset-(20+6.663);
 //-------------------------------------------------------------------------------------------------------------------
 TSDepth=28;
 ScreenBaseThickness=3;
@@ -591,22 +593,16 @@ module ScreenCorner(Thickness=10) {
 module PICaseAccessCover(Mounting=0) {
 	difference() {
 		union() {
-			color("cyan") cubeX([146,85,3],2);
+			color("cyan") cubeX([146,85,3],1);
 			if(Mounting==0) {
-				difference() {
-					translate([20,-15,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
-					translate([0,80,-2]) color("red") cube([30,50,8]);
-				}
-				difference() {
-					translate([145.9,-15,4]) rotate([270,0,90]) PITabbedBracket(30,113,60,0);
-					translate([124,80,-2]) color("plum") cube([30,50,8]);
-				}
+				translate([20,-15,5]) rotate([270,0,90]) PITabbedBracket(0,30,80,60,0);
+				translate([145.9,-15,5]) rotate([270,0,90]) PITabbedBracket(0,30,80,60,0);
 			}
 		}
 		translate([TSScrewLeftOffset-20.5,TSScrewTopOffset-12,0]) {
 		translate([-2.5,0,0]) TSMountScrews(screw3);
-		translate([-2.5,0,7]) TSCoverMountHolesCS();
-		translate([50,20,-5]) color("black") cubeX([30,30,10],2);
+		translate([-2.5,0,8]) TSCoverMountHolesCS();
+		translate([100,18,-5]) color("black") cubeX([10,30,10],2);
 		}
 	}
 }
