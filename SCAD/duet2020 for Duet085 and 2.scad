@@ -87,11 +87,6 @@ D3HoleOffset=4.3;	// Duet 3 corner hole offset
 //Duet2(1,2,0,D2Width,D2Length,D2HoleOffset,1);	// Arg1: 0 duet085, Duet 2; Arg2:FanNotch 0 ? 1;
 												// Arg3:Blower 0 ? 1; Arg4:Width; Arg5:Length; Arg6: HoleOffset
 												// Arg7:Duet 2 cover:0=ethernet,1=none,2=wifi
-//Duet3_6HC(D3Width,D3Length,D3HoleOffset,SpacerThickness,0,1,1,0,1,1); // arg 1=width, arg2=length,arg3=holeoffset of 2020,
-																// arg4=spacer thickness, arg5=enable portcover
-																// arg6=blower adapter, arg7=move 2020 holes up/down
-																// arg8=makerslide alignment tab
-																// arg9=PI mount : 0-none; 1-attached, 2=seperate
 //partial();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,26 +158,6 @@ module duet(FanNotch=2) {
 	spacer(4,SpacerThickness,screw3,20,30,0); // put them in one of the vent holes
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-module Duet3_6HC(Width,Length,HoleOffset,Thickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,MSTab,PI=0)
-{
-	platform3(Width,Length,HoleOffset);
-	mount3(Width,Length,Offset2020,MSTab);
-	difference() {
-		supports3(Width,Length,HoleOffset);
-		PlatformScrewMounts(Yes3mmInsert(),Width,Length,HoleOffset);
-	}
-	if(PI==1) {
-		//%translate([138,51,-12])cube([5,89.2,5]); // measure for the 26 pin connector location
-		translate([135,45.8,0]) rotate([0,0,0]) pi4_mount();
-	}
-	if(Cover) translate([-5,-20,0]) portcover(3,89,PlatformThickness+1,Width,Length,HoleOffset);
-	if(Blower) translate([200,0,0]) rotate([0,0,90]) blower_adapter(20,15,48,1);
-	if(Blower2) translate([170,0,0]) rotate([0,0,90]) blower_adapter2(20,15,48,1);
-	if(Cover) spacer(2,Thickness,screw3,20,30,0); // put them in one of the vent holes
-	else translate([20,30,0]) spacer2(4,Thickness,screw3);//,20,30,0); // put them in one of the vent holes
-}
 //////////////////////////////////////////////////////////////////////////
 
 module duetoverhang(FanNotch=2) {

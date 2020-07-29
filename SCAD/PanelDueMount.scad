@@ -19,6 +19,8 @@ Use3mmInsert=1;
 include <brassfunctions.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
+// **NOTE: You'll get low voltage lightning on the screen if power form the Duet 3 6HC
+///////////////////////////////////////////////////////////////////////////////////////
 clearance = 2;	// amount needed to let the case slide in
 thickness = 7;	// thickness of the bracket
 //----------------------------------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 // duet2020 Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 6/2/20
+// last update 7/23/20
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -12,6 +12,8 @@
 // 6/20/20	- Added a case for the Official Raspberry PI 7" Touchscreen
 // 6/21/20	- Added an access door to the back of the pi screen case and added the mounts to the access cover
 // 6/25/20	- Mounting brackets on access cover can be removed
+// 6/28/20	- Added a blower mount for a 4010
+// 7/23/20	- Move PI4 farther from the duet 3 to be able to access the hdmi connectors
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -60,23 +62,61 @@ pi4length=85;
 pi4rail=15;
 pi4s1off=3.5;
 pi4s2off=pi4s1off+58;
-pi4s3off=3.5;
-pi4s4off=pi4s3off+58;
+pi4s4off=pi4s2off;
+pi4VOffset=49;
 // Variables for the Raspberry PI 7" Touchscreen are above PI7Touchscreen()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Duet3_6HC(D3Width,D3Length,D3HoleOffset,SpacerThickness,0,1,1,0,1,1); // arg 1=width, arg2=length,arg3=holeoffset of 2020,
-																// arg4=spacer thickness, arg5=enable portcover
+// room to use hmdi connections									// arg4=spacer thickness, arg5=enable portcover
+																// arg6=blower adapter, arg7=move 2020 holes up/down
+																// arg8=makerslide alignment tab
+																// arg9=PI mount : 0-none; 1-attached, 2=seperate
+Duet3_6HCClosePi(D3Width,D3Length,D3HoleOffset,SpacerThickness,0,1,1,0,1,1); // arg 1=width, arg2=length,arg3=holeoffset of 2020,
+// no room to use hdmi connections								// arg4=spacer thickness, arg5=enable portcover
 																// arg6=blower adapter, arg7=move 2020 holes up/down
 																// arg8=makerslide alignment tab
 																// arg9=PI mount : 0-none; 1-attached, 2=seperate
 //PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
-PI7TouchscreenV2(0);  // has corner edges around screen
+//PI7TouchscreenV2(0);  // has corner edges around screen
 //PICaseAccessCover(0);
+//TestFitScreenParts();
 //translate([21,12,-3])	PICaseAccessCover(0); // to test fit
 //translate([171,97,-3]) rotate([0,0,180]) PICaseAccessCover(0); // to test fit
+//Blower4010();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module Duet3_6HCClosePi(Width,Length,HoleOffset,Thickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,MSTab,PI=0)
+{
+	platform3(Width,Length,HoleOffset);
+	mount3(Width,Length,Offset2020,MSTab);
+	difference() {
+		supports3(Width,Length,HoleOffset);
+		PlatformScrewMounts(Yes3mmInsert(),Width,Length,HoleOffset);
+	}
+	if(PI==1) {
+		//%translate([138,51,-12])cube([5,89.2,5]); // measure for the 26 pin connector location
+		translate([145,45.8,0]) rotate([0,0,0]) pi4_mount();
+		translate([135,45.8,0]) pi4CloseAttachment();
+	}
+	if(Blower) translate([230,-5,0]) rotate([0,0,90]) Blower4010();  //blower_adapter(20,15,48,1);
+	if(Blower2) translate([185,-5,0]) rotate([0,0,90]) Blower4010(); //blower_adapter2(20,15,48,1);
+	translate([20,30,0]) spacer2(8,Thickness,screw3);//,20,30,0); // put them in one of the vent holes
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module pi4CloseAttachment() {
+	color("green") cubeX([14.5,pi4rail,MountThickness],2);
+	translate([0,70,0]) color("plum") cubeX([14.5,pi4rail,MountThickness],2); // vertical
+	translate([0,38,0]) color("purple") cubeX([14.5,MountThickness,MountThickness],2);
+	translate([-3,4.5,0]) color("white") cubeX([14,MountThickness,13.5],2);
+	translate([-3,38,0]) color("gray") cubeX([14,MountThickness,13.5],2);
+	translate([-3,75,0]) color("khaki") cubeX([14,MountThickness,13.5],2);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 module Duet3_6HC(Width,Length,HoleOffset,Thickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,MSTab,PI=0)
 {
@@ -88,11 +128,32 @@ module Duet3_6HC(Width,Length,HoleOffset,Thickness,Cover=0,Blower=0,Blower2=0,Of
 	}
 	if(PI==1) {
 		//%translate([138,51,-12])cube([5,89.2,5]); // measure for the 26 pin connector location
-		translate([135,45.8,0]) rotate([0,0,0]) pi4_mount();
+		translate([195,45.8,0]) rotate([0,0,0]) pi4_mount();
+		translate([135,45.8,0]) pi4Attachment();
 	}
-	if(Blower) translate([200,0,0]) rotate([0,0,90]) blower_adapter(20,15,48,1);
-	if(Blower2) translate([170,0,0]) rotate([0,0,90]) blower_adapter2(20,15,48,1);
-	translate([20,30,0]) spacer2(4,Thickness,screw3);//,20,30,0); // put them in one of the vent holes
+	if(Blower) translate([230,-5,0]) rotate([0,0,90]) Blower4010();
+	if(Blower2) translate([185,-5,0]) rotate([0,0,90]) Blower4010();
+	translate([20,30,0]) spacer2(8,Thickness,screw3);//,20,30,0); // put them in one of the vent holes
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+module pi4Attachment() { // move out from duet
+	color("green") cubeX([65,pi4rail,MountThickness],2);
+	translate([0,70,0]) color("plum") cubeX([65,pi4rail,MountThickness],2); // vertical
+	translate([0,33,0]) color("purple") cubeX([65,pi4rail,MountThickness],2);
+	translate([-3,4.5,0]) color("white") cubeX([64,MountThickness,13.5],2);
+	translate([-3,38,0]) color("gray") cubeX([64,MountThickness,13.5],2);
+	translate([-3,75,0]) color("khaki") cubeX([64,MountThickness,13.5],2);
+	translate([0,2,0]) color("lightgray") rotate([0,0,27]) cubeX([75,5,MountThickness],2);
+	translate([0,77,0]) color("cyan") rotate([0,0,-29]) cubeX([75,5,MountThickness],2);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module TestFitScreenParts() {
+	translate([21,12,-3])	PICaseAccessCover(0); // to test fit
+	translate([171,97,-3]) rotate([0,0,180]) PICaseAccessCover(0); // to test fit
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +202,16 @@ module platform3(Width,Length,HoleOffset) { // main platform
 		vents3();
 		translate([0,GetHoleLen3mm(Yes3mmInsert())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
 		translate([45,GetHoleLen3mm(Yes3mmInsert())-4,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert());
+		translate([100,5,PlatformThickness/2]) fanmountside(Screw=Yes3mmInsert());
+		translate([60,5,PlatformThickness/2]) fanmountside(Screw=Yes3mmInsert());
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module fanmountside(Screw=Yes3mmInsert()) { // on side of platform
+	rotate([90,0,0]) color("white") cylinder(h=GetHoleLen3mm(),d=Yes3mmInsert());
+	translate([FanPlatformMountOffset,0,0]) rotate([90,0,0]) color("red") cylinder(h=GetHoleLen3mm(),d=Yes3mmInsert());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,16 +452,15 @@ module pi4_mount() {
 		pi4_support();
 		translate([3,0,0]) Pi4MountHoles(Screw=Yes3mmInsert());
 	}
-	translate([-20,12,0]) spacer2(4,PCSpacerThickness,screw3);//,-20,12,0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module Pi4MountHoles(Screw=Yes3mmInsert()) {
 	translate([pi4s1off,pi4s1off,-1]) color("white") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
-	translate([pi4s1off,pi4s2off+0.1,-1]) color("black") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
-	translate([pi4width-pi4s3off,pi4s3off,-1]) color("gray") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
-	translate([pi4width-pi4s3off+0.1,pi4s4off,-1]) color("red") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
+	translate([pi4s1off,pi4s2off,-1]) color("black") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
+	translate([pi4s1off+pi4VOffset,pi4s1off,-1]) color("gray") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
+	translate([pi4s1off+pi4VOffset,pi4s4off,-1]) color("red") cylinder(h=GetHoleLen3mm(Yes3mmInsert()),d=Yes3mmInsert());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -418,7 +487,10 @@ module pi4_support() {
 		translate([3,0,-6]) rotate([0,7,0])	color("pink") cubeX([pi4width+3,MountThickness,20],2);
 		translate([0,-2.5,-18]) color("salmon") cube([pi4width+10,MountThickness+5,20]);
 	}
-
+	translate([-9,38,0]) difference() {
+		translate([3,0,-6]) rotate([0,7,0])	color("red") cubeX([pi4width+3,MountThickness,20],2);
+		translate([0,-2.5,-18]) color("salmon") cube([pi4width+10,MountThickness+5,20]);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -441,8 +513,8 @@ TSScrew1=0;
 TSScrew2=TSScrew1+TSScrewVOffset;
 TSScrew3=0;
 TSScrew4=TSScrew3+TSScrewHOffset;
-AdjustY=1.5; // fine tune the screen mounting
-AdjustX=2.5; // fine tune the screen mounting
+AdjustY=1; // fine tune the screen mounting
+AdjustX=2; // fine tune the screen mounting
 TSScrewTopOffset=21.58+AdjustY; // 100.6-TSScrewVOffset-21.58;
 TSScrewLeftOffset=20+12.54+AdjustX; // 166.2-TSScrewHOffset-(20+6.663);
 //-------------------------------------------------------------------------------------------------------------------
@@ -635,6 +707,48 @@ module Frame(Depth=TSDepth,Test=0) {
 
 module TSCoverMountHolesCS() {
 	TSMountScrews(screw3hd);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module Blower4010() {
+	difference() {
+		color("cyan") cubeX([46,40,3],1);
+		translate([6,0,0]) 4010MountHoles();
+		translate([0,4,0]) 4010MountToDuet();
+	}
+	difference() {
+		translate([0,0,0]) color("pink") cubeX([6,40,15],1);
+		translate([-1,5.5,3]) color("gray") cubeX([10,30,10],1);
+		translate([0,4,0]) 4010MountToDuet();
+	}
+	//translate([20,20,3]) ShowBlower4010();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+4040MountOffset=34.9;
+
+module 4010MountHoles() {
+	translate([2.5,2.5,-2]) color("red") cylinder(h=10,d=screw2t);
+	translate([2.5+4040MountOffset,2.5,-2]) color("blue") cylinder(h=10,d=screw2t);
+	translate([2.5,2.5+4040MountOffset,-2]) color("plum") cylinder(h=10,d=screw2t);
+	translate([2.5+4040MountOffset,2.5+4040MountOffset,-2]) color("black") cylinder(h=10,d=screw2t);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module 4010MountToDuet() {
+	translate([-1,0,3]) color("white") rotate([0,90,0]) cylinder(h=15,d=screw3);
+	translate([-1,FanMountOffset,3]) color("lightgray") rotate([0,90,0]) cylinder(h=15,d=screw3);
+	translate([3,0,3]) color("blue") rotate([0,90,0]) cylinder(h=15,d=screw3hd);
+	translate([3,FanMountOffset,3]) color("purple") rotate([0,90,0]) cylinder(h=15,d=screw3hd);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module ShowBlower4010() {
+	%import("4010_Blower_Fan_v2.stl"); // http://www.thingiverse.com/thing:1576438
 }
 
 //////////////////// end of duet2020.scad ////////////////////////////////////////////////////////////
