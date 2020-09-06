@@ -2,11 +2,13 @@
 // keyboard.scad
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created 7/19/2020
-// Last Update 7/25/20
+// Last Update 8/20/20
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 7/19/20	- Keybaord platform
 // 7/20/20	- Keyboard bracing
 // 7/23/20	- Added a second version of braces to not use the keyboard()
+// 8/1/20	- changed the SimpleKeyboardBraces() to hold the keyboard at an angle
+// 8/20/20	- changed simplekeyboradbraces to a more solid one
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 include <inc/cubex.scad>
@@ -79,16 +81,21 @@ module PlatformBraces(Qty=1) {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 module SimpleKeyboardBraces(Qty=1) {
-	for(x = [0 : Qty-1]) {
-		translate([x*45,0,0]) rotate([201,0,0]) {
-			difference() { // 2040 mounting
-				color("blue") cubeX([40,Thickness,40.5],1);
-				translate([10,0,10]) ScrewHoles(screw5);
-			}
-			difference() {
-				TheBraces(); // holds keyboard
-				translate([-2,-2,40.45]) color("khaki") cube([45,10,10]);
-				translate([-2,-9,-2]) color("green") cube([10,10,10]);
+	rotate([0,-90,0]) {
+		for(x = [0 : Qty-1]) {
+			translate([0,0,x*50]) {
+				difference() {
+					union() {
+						translate([0,0,0]) color("blue") cubeX([20,Thickness,40.5],2); // 2040 mounting
+						translate([0,0,36]) rotate([-5,0,0]) color("cyan") cubeX([20,Width,Thickness],2); //  keyboard shelf
+						translate([0,Width-Thickness,28]) rotate([-5,0,0]) color("pink") cubeX([20,Thickness,12],2);
+					}
+					translate([10,0,9]) ScrewHoles(screw5);
+				}
+				difference() {
+					SimpleKeyboardSupport();
+					translate([10,0,9]) ScrewHoles(screw5);
+				}
 			}
 		}
 	}
@@ -96,26 +103,27 @@ module SimpleKeyboardBraces(Qty=1) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module TheBraces() { // holds keyboard
-	color("red") cubeX([Thickness,Width,Thickness],1);
-	translate([40-Thickness,0,0]) color("cyan") cubeX([Thickness,Width,Thickness],1);
-	translate([0,0,0]) color("plum") rotate([0,0,-20]) cubeX([Thickness,Width+5,Thickness],1);
-	translate([0,0,40-Thickness+1.75]) color("black") rotate([-21,0,0]) cubeX([Thickness,Width+4,Thickness],1);
-	translate([40-Thickness,-0,40-Thickness+1.75]) color("gray") rotate([-21,0,0]) cubeX([Thickness,Width+4,Thickness],1);
-	translate([0,Width-Thickness+1.5,-Thickness-0.6]) color("pink") rotate([10,0,0]) cubeX([40,Thickness,Thickness*2],1);
+module SimpleKeyboardSupport() {
+	difference() {
+		color("red") rotate([17,0,0]) cubeX([Thickness,Width+4,10],2);
+		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cubeX([Thickness*2,120,Thickness*3],1);
+		translate([-4,-9,0]) rotate([0,0,0]) color("white") cubeX([Thickness*2,10,Thickness*3],1);
+	}
+	translate([15,0,0]) difference() {
+		color("black") rotate([17,0,0]) cubeX([Thickness,Width+4,10],2);
+		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cubeX([Thickness*2,120,Thickness*3],1);
+		translate([-4,-9,0]) rotate([0,0,0]) color("khaki") cubeX([Thickness*2,10,Thickness*3],1);
+	}
+	translate([0,40,13.25]) cubeX([20,Thickness,9.75],2);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module ScrewHoles(Screw=screw5) {
 	translate([0,Thickness+2,0]) color("red") rotate([90,0,0]) cylinder(h=10,d=Screw);
-	translate([20,Thickness+2,0]) color("black") rotate([90,0,0]) cylinder(h=10,d=Screw);
 	translate([0,Thickness+2,20]) color("white") rotate([90,0,0]) cylinder(h=10,d=Screw);
-	translate([20,Thickness+2,20]) color("cyan") rotate([90,0,0]) cylinder(h=10,d=Screw);
 	if(Screw==screw5) {
-		translate([0,Thickness*2-1.5,0]) color("cyan") rotate([90,0,0]) cylinder(h=5,d=screw5hd);
-		translate([20,Thickness*2-1.5,0]) color("white") rotate([90,0,0]) cylinder(h=5,d=screw5hd);
-		translate([0,Thickness*2-1.5,20]) color("black") rotate([90,0,0]) cylinder(h=5,d=screw5hd);
-		translate([20,Thickness*2-1.5,20]) color("red") rotate([90,0,0]) cylinder(h=5,d=screw5hd);
+		translate([0,34,0]) color("cyan") rotate([90,0,0]) cylinder(h=30,d=screw5hd);
+		translate([0,14,20]) color("green") rotate([90,0,0]) cylinder(h=10,d=screw5hd);
 	}
 }
 
