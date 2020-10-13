@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// duet2020.scad - mount a duet 085, 2 and 3 to 2020 extrusion
+// duet085 and 2.scad - mount a duet 085, 2 and 3 to 2020 extrusion
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 5/5/2016
-// last update 6/22/2020
+// last update 9/15/20
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5/22/16	- Added DueX4 board and a simple covers for the Duet & DueX4
 // 6/26/16	- Added overhang version where it places the board out over the 2020 it mounts on
@@ -20,6 +20,7 @@
 //			  to mount them back to back.  Will need longer spacers between X board and mount
 // 1/18/17	- Added colors to preview for easier editing
 // 6/22/20	- Seperated Duet 085 and 2 to a separate file from Duet 3, this one has Duet 085 and 2
+// 9/15/20	- Added a standoff cover for the Duet 2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Demensions from:
 // Duet 0.8.5: http://reprap.org/wiki/Duet#Dimensions
@@ -67,9 +68,6 @@ D085HoleOffset = 4;	// Duet 085 corner hole offset
 D2Width = 100;		// Duet 2 width
 D2Length = 123;		// Duet 2 length
 D2HoleOffset = 4;	// Duet 2 corner hole offset
-D3Width = 134;		// Duet 3 width
-D3Length=140;		// Duet 3 length
-D3HoleOffset=4.3;	// Duet 3 corner hole offset
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Cover(D085Width,D085Length);
@@ -84,9 +82,11 @@ D3HoleOffset=4.3;	// Duet 3 corner hole offset
 												// Arg3:Blower 0 ? 1; Arg3:Width; Arg4:Length; Arg4: HoleOffset
 												// Arg6:Duet 2 cover:0=ethernet,1=none,2=wifi
 
-Duet2(2,2,0,D2Width,D2Length,D2HoleOffset,1);	// Arg1: 0 duet085, Duet 2; Arg2:FanNotch 0 ? 1;
+//Duet2(2,2,0,D2Width,D2Length,D2HoleOffset,1);	// Arg1: 0 duet085, Duet 2; Arg2:FanNotch 0 ? 1;
 												// Arg3:Blower 0 ? 1; Arg4:Width; Arg5:Length; Arg6: HoleOffset
 												// Arg7:Duet 2 cover:0=ethernet,1=none,2=wifi
+DuetCover(D2Width,D2Length,D2HoleOffset);
+//DuetCover(D085Width,D085Length,D085HoleOffset);
 //partial();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,6 +141,31 @@ module partial(Width,Length,HoleOffset) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+module DuetCover(Width,Length,HoleOffset,Screw=screw3) {
+	difference() {
+		color("cyan") cubeX([Width,Length,4],2);
+		PlatformScrewMounts(Yes3mmInsert(),Width,Length,HoleOffset);
+	}
+	translate([HoleOffset,HoleOffset-1,0]) color("red") TaperedSpacer(40,Screw);
+	translate([Width-HoleOffset,HoleOffset-1,-1]) color("black") TaperedSpacer(40,Screw);
+	translate([Width-HoleOffset,Length-HoleOffset-0.5,-1]) color("blue") TaperedSpacer(40,Screw);
+	translate([HoleOffset,Length-HoleOffset-0.5,-1]) color("gray") TaperedSpacer(40,Screw);
+}
+
+///////////////////////////////////////////////////////////////////////
+
+module TaperedSpacer(Thickness,Screw=screw3) { // spacer to move pc board off platform
+	difference() {
+		color("blue") hull() {
+			translate([0,0,Thickness]) cylinder(h=1,d = Screw*1.5);
+			translate([0,0,0]) cylinder(h=1,d = Screw*2.5);
+		}
+		translate([0,0,-2]) color("green") cylinder(h=Thickness+10,d = Screw);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module dueX25(Type=0) {
 	if(Type) {

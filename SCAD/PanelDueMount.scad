@@ -2,7 +2,7 @@
 // PanelDueMount.scad - something simple to hold dc42's PanelDue case to 2020 and my PI Touchscreen case
 ///////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 6/20/20
+// last update 10/11/20
 ///////////////////////////////////////////////////////////////////////////////////////
 // 8/4/16	- changed bracket to take args for size of paneldue case
 // 8/13/16	- width of bracket now based on depth of PanelDue case
@@ -12,11 +12,12 @@
 // 12/17/18	- Added color to preview
 // 4/21/20	- Added another tab for strength
 // 6/5/20	- Added use of a brass insert
+// 9/29/20	- Added DC42Spacer() for dc42's paneldue enclosure
+// 10/11/20	- Added an angle spacer to tilit dc42's paneldue 7" case
 ///////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad>
-Use3mmInsert=1;
-include <brassfunctions.scad>
+include <brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
 // **NOTE: You'll get low voltage lightning on the screen if power form the Duet 3 6HC
@@ -31,14 +32,51 @@ TSScrewHOffset=126.2;
 TSScrewVOffset=65.5;
 TSScrewTopOffset=21.58;
 TSScrewLeftOffset=20;
+// https://duet3d.dozuki.com/Wiki/PanelDue#Section_3D_Models_and_Enclosures
+
+//------------------------------------------------------------------------------------------------------------
+Use3mmInsert=1;
+Use5mmInsert=1;
+LargeInsert=1;
 ///////////////////////////////////////////////////////////////////////////////////////
 
 //bracket(31,89.5);				// for a 4.3" PanelDue
 //bracket(33,124);				// for a 7" PanelDue
 //tabbedbracket(0,31,89.5,20,0);	// 3rd arg is length of mounting tab, 4th arg is rotate 90 degrees
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
-tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
+//tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
+//DC42Spacer(6,2);
+AngleMountPanelDue7();
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module AngleMountPanelDue7() {
+	difference() {
+		color("cyan") hull() {
+			cubeX([130,15,1],1);
+			translate([0,13,8]) cubeX([130,1,1],1);
+		}
+		translate([25,10,-5]) color("black")cylinder(d=screw5,h=20);
+		translate([25,10,4]) color("white")cylinder(d=screw5hd,h=10);
+		translate([105,10,-5]) color("white")cylinder(d=screw5,h=20);
+		translate([105,10,4]) color("black")cylinder(d=screw5hd,h=10);
+		translate([15,13,-5]) rotate([35,0,0]) {
+			translate([0,0,0]) color("red")cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+			translate([100,0,0]) color("blue") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module DC42Spacer(Tall=0,Quanity=1) {
+	for(x = [0 : Quanity-1]) {
+		translate([x*12,0,0]) difference() {
+			color("cyan") cubeX([10,20,Tall],2);
+			translate([5,10,-2]) color("red") cylinder(h=5+Tall,d=screw5);
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +109,7 @@ module mountingholes(p_depth,p_height) { // flat mounting
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module clampingscrew(p_depth,p_height) {
-	translate([-2,(p_depth+clearance)/2+thickness,p_depth/2]) rotate([0,90,0]) color("plum") cylinder(h=300,d=Yes3mmInsert());
+	translate([-2,(p_depth+clearance)/2+thickness,p_depth/2]) rotate([0,90,0]) color("plum") cylinder(h=300,d=Yes3mmInsert(Use3mmInsert,LargeInsert));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
