@@ -17,8 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad>
-Use3mmInsert=1;
-include <brassfunctions.scad>
+include <inc/brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ** NOTE: Cannot be powered by the Duet 3 6HC, the pi4 gives a low voltage warning
@@ -47,7 +46,8 @@ AdjustX=2; // fine tune the screen mounting
 TSSpacerDepth=16;
 TSDepth=TSSpacerDepth+TSScreenThickness;
 ScreenBaseThickness=3;
-
+Use3mmInsert=1;
+LargeInsert=1;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
@@ -68,7 +68,7 @@ module TestPrintHoles() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module TSMountScrews(Screw=Yes3mmInsert()) {
+module TSMountScrews(Screw=Yes3mmInsert(Use3mmInsert,LargeInsert)) {
 	translate([0,0,-5]) color("blue") cylinder(h=15,d=Screw);
 	translate([0,TSScrewVOffset,-5]) color("green") cylinder(h=15,d=Screw);
 	translate([TSScrewHOffset,0,-5]) color("purple") cylinder(h=15,d=Screw);

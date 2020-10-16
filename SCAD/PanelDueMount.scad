@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad>
-include <brassinserts.scad>
+include <inc/brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
 // **NOTE: You'll get low voltage lightning on the screen if power form the Duet 3 6HC
@@ -46,11 +46,11 @@ LargeInsert=1;
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
 //tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
 //DC42Spacer(6,2);
-AngleMountPanelDue7();
+AngleMountPanelDue();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module AngleMountPanelDue7() {
+module AngleMountPanelDue() {
 	difference() {
 		color("cyan") hull() {
 			cubeX([130,15,1],1);

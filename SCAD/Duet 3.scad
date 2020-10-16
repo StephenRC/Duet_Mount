@@ -46,14 +46,13 @@
 // includes
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad> // http://www.thingiverse.com/thing:112008
-include <brassinserts.scad>
+include <inc/brassinserts.scad>
 $fn=50;		// 100 takes a long, long time to render
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// vars
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Use2p5mmInsert=1;
 Use3mmInsert=1;
-Use4mmInsert=0;
+Use4mmInsert=1;
+//------------------------------------------------------------------------------------------------------------
 LargeBrassInsert=1;
 PlatformThickness=5;	// thickness of platform
 MountThickness=5;		// thickness of mount
@@ -95,9 +94,10 @@ TDBBracketWidth=Pi4BracketWidth;
 //Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
 //Duet3_6HCCover(D3Width,D3Length);
-Pi4Cover(0);
+//Pi4Cover(0);
 //translate([145,0,0])		// move over if you set the above to not have the pi mount builtin
 //	Pi4StandAlone(0);		// a separate mount for just the pi4; args: ShortEnd=0,Screw=Yes2p5mmInsert(),DoSpacers=0,ShowPi=0
+Blower5150();
 //Blower4010();
 //ToolBoard1LC();
 //ToolDistibutionBoard(0);	// ShortEnd=0,Spacers=1
@@ -621,7 +621,7 @@ module pi4_support(DoMiddle=1) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Blower5150(blower_h,blower_w,blower_m_dist,Shift=0) { // to use a 50mm 10x15 blower instead of a 40mm axial
+module Blower5150(blower_h=1520,blower_w=1,blower_m_dist=43,Shift=0) { // to use a 50mm 10x15 blower instead of a 40mm axial
 	difference() {
 		color("cyan") cubeX([FanMountOffset+10,blower_w+10.5+Shift,PlatformThickness+1]);
 		translate([blower_h/2,PlatformThickness+Shift,-2]) color("white") cube([blower_h,blower_w,10]);
