@@ -50,8 +50,8 @@ Use3mmInsert=1;
 LargeInsert=1;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
-PiTouchscreenBracket(2,1,30,90,60,30,0);		// for the 7" PI Touchscreen on a 2040
+PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
+//PiTouchscreenBracket(2,1,30,90,60,30,0);		// for the 7" PI Touchscreen on a 2040
 //					Qty=1,MountHoles=1,p_depth,p_height,m_depth,Angle=30,Show=0
 //TestPrintHoles();
 

@@ -91,16 +91,16 @@ TDBLength=70;			// board length
 TDBBracketWidth=Pi4BracketWidth;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
+Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
 //Duet3_6HCCover(D3Width,D3Length);
 //Pi4Cover(0);
 //translate([145,0,0])		// move over if you set the above to not have the pi mount builtin
 //	Pi4StandAlone(0);		// a separate mount for just the pi4; args: ShortEnd=0,Screw=Yes2p5mmInsert(),DoSpacers=0,ShowPi=0
-Blower5150();
+//Blower5150();
 //Blower4010();
 //ToolBoard1LC();
-//ToolDistibutionBoard(0);	// ShortEnd=0,Spacers=1
+//translate([70,0,0]) ToolDistibutionBoard(0,1);	// ShortEnd=0,Spacers=1
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -349,8 +349,8 @@ module fanmountside(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) { // on s
 
 ////////////////////////////////////////////////////////////////////////
 module fanmountplatform(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) {
-	cylinder(h=20(),d=Screw);
-	translate([FanPlatformMountOffset,0,0]) cylinder(h=20(),d=Screw);
+	cylinder(h=20,d=Screw);
+	translate([FanPlatformMountOffset,0,0]) cylinder(h=20,d=Screw);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -436,7 +436,7 @@ module Duet3Supports(Width,Length,HoleOffset) { // connects & support main platf
 	difference() {
 		translate([-5,19,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 			color("pink") cubeX([SupportThickness,Length-10,PortCoverHeight+PlatformThickness],2);
-		translate([0,20()+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+		translate([0,40,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 		translate([-7,3,-SupportThickness-19]) color("cyan") cube([MountThickness+5,D3Length+5,PortCoverHeight+5]);
 		translate([-5,Length+4.8,0]) color("white") cube([Width+10,10,PortCoverHeight+10]);
 	}
@@ -450,7 +450,7 @@ module Duet3Supports(Width,Length,HoleOffset) { // connects & support main platf
 	difference() {
 		translate([Width/3-SupportThickness/2,19,-PortCoverHeight+SupportThickness-3]) rotate([10,0,0])
 			color("blue") cubeX([MountThickness,Length-10,PortCoverHeight+PlatformThickness],2);
-		translate([0,20()+20,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+		translate([0,40,PlatformThickness/2]) rotate([90,0,0]) fanmountplatform(Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 		translate([Width/3-SupportThickness/2-1,3,-SupportThickness-19]) color("white")
 			cube([MountThickness+5,Length+5,PortCoverHeight+5]);
 		translate([-5,Length+4.8,0]) color("red") cube([Width+10,10,PortCoverHeight+10]);
