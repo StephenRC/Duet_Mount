@@ -2,7 +2,7 @@
 // PanelDueMount.scad - something simple to hold dc42's PanelDue case to 2020 and my PI Touchscreen case
 ///////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 10/11/20
+// last update 11/23/20
 ///////////////////////////////////////////////////////////////////////////////////////
 // 8/4/16	- changed bracket to take args for size of paneldue case
 // 8/13/16	- width of bracket now based on depth of PanelDue case
@@ -14,16 +14,18 @@
 // 6/5/20	- Added use of a brass insert
 // 9/29/20	- Added DC42Spacer() for dc42's paneldue enclosure
 // 10/11/20	- Added an angle spacer to tilit dc42's paneldue 7" case
+// 11/23/20	- Added an anlge version to allow acces to the sd card slot, requires mount holes in dc42's paneldue lid
 ///////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
 use <inc/cubeX.scad>
 include <inc/brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
-// **NOTE: You'll get low voltage lightning on the screen if power form the Duet 3 6HC
+// **NOTE: You'll get low voltage lightning every so often on the pi/hdmi screen if powered from the Duet 3 6HC
 ///////////////////////////////////////////////////////////////////////////////////////
 clearance = 2;	// amount needed to let the case slide in
 thickness = 7;	// thickness of the bracket
+LayerThickness=0.3;
 //----------------------------------------------------------------------------------------------------------
 // From: https://www.raspberrypi.org/documentation/hardware/display/  Scroll to bottom for the drawing
 // Some dimensions are rounded up
@@ -46,25 +48,67 @@ LargeInsert=1;
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
 //tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
 //DC42Spacer(6,2);
-AngleMountPanelDue();
+//AngleMountPanelDue();
+AngleMountPanelDueSD(1);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module AngleMountPanelDue() {
+module AngleMountPanelDue(NoExtMount=0) {
 	difference() {
 		color("cyan") hull() {
 			cubeX([130,15,1],1);
 			translate([0,13,8]) cubeX([130,1,1],1);
 		}
-		translate([25,10,-5]) color("black")cylinder(d=screw5,h=20);
-		translate([25,10,4]) color("white")cylinder(d=screw5hd,h=10);
-		translate([105,10,-5]) color("white")cylinder(d=screw5,h=20);
-		translate([105,10,4]) color("black")cylinder(d=screw5hd,h=10);
+		if(!NoExtMount) {
+			translate([25,10,-5]) color("black")cylinder(d=screw5,h=20);
+			translate([25,10,4]) color("white")cylinder(d=screw5hd,h=10);
+			translate([105,10,-5]) color("white")cylinder(d=screw5,h=20);
+			translate([105,10,4]) color("black")cylinder(d=screw5hd,h=10);
+		}
 		translate([15,13,-5]) rotate([35,0,0]) {
-			translate([0,0,0]) color("red")cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+			translate([0,0,0]) color("red") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
 			translate([100,0,0]) color("blue") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module AngleMountPanelDueSD(HorizontalMount=0) {
+	difference() {
+		difference() {
+			union() {
+				if(HorizontalMount) color("cyan") cubeX([130,20+thickness,thickness],2);
+				color("blue") cubeX([130,thickness,33+thickness],2);
+				translate([0,-4,25]) color("pink") cubeX([130,thickness+3,8+thickness],2);
+				translate([0,-2,25]) rotate([90,0,0]) AngleMountPanelDue(1);
+				translate([0,-2,26]) color("cyan") hull() {
+					translate([0,-2,0]) cubeX([130,6,1],1);
+					translate([0,3,-6]) cubeX([130,1,1],1);
+				}
+			}
+			translate([15,10,42]) rotate([125,0,0]) {
+				translate([0,0,0]) color("white") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+				translate([100,0,0]) color("pink") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+			}
+		}
+		if(HorizontalMount) {
+			translate([10,10+thickness,-3]) color("red") cylinder(h=15,d=screw5); 
+			translate([120,10+thickness,-3]) color("plum") cylinder(h=15,d=screw5);
+			translate([10,10+thickness,-3]) color("plum") cylinder(h=5,d=screw5hd); 
+			translate([120,10+thickness,-3]) color("red") cylinder(h=5,d=screw5hd);
+		} else {
+			echo("vertical");
+			translate([10,10,10]) rotate([90,0,0]) color("red") cylinder(h=15,d=screw5); 
+			translate([120,10,10])  rotate([90,0,0]) color("plum") cylinder(h=15,d=screw5);
+			translate([10,2,10])  rotate([90,0,0]) color("plum") cylinder(h=5,d=screw5hd); 
+			translate([120,2,10])  rotate([90,0,0]) color("red") cylinder(h=5,d=screw5hd);
+		}
+	}
+		if(HorizontalMount) {
+			translate([10,10+thickness,2])  color("black") cylinder(h=LayerThickness,d=screw5hd); // support
+			translate([120,10+thickness,2])  color("gray") cylinder(h=LayerThickness,d=screw5hd); // support
+		}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

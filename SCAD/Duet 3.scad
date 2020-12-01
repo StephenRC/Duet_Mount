@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 9/13/20
+// last update 11/25/20
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -21,6 +21,11 @@
 // 9/13/20	- Can set mount of Pi4 and Tool Distrubution Board to be on the long or short side
 // 9/19/20	- Thinned down crossmembers for Pi mount
 // 11/8/20	- Added 3HC and Duet 3 Mini
+// 11/12/20	- Added a due 3 with pi, seperated enough to be able to use a usb power cable to power the pi
+//			  Fixed Pi4 mounting holes
+// 11/14/20	- Added an antenna mount
+// 11/15/20	- Added another set of mount holes for ToolBoard1LC() so that it can be mounted on either side of Aero extruder
+// 11/25/20	- Added 18mm spacers to mount to mount tool board 1LC on rigth side of SingleAero
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -47,6 +52,10 @@
 //-------------------------------------------------------------------------------------
 // PI Touchscreen has to be supplied it's own 5vdc power. Powering via the dotstar connector gives low pi voltage warning.
 // Duet uses M3 screws and the Pi uses M2.5 screws
+//--------------------------------------------------------------------------------------------
+// **** Test the placement of the PI, make sure the WIFI works where you want to put the PI
+// For example, the PI WIFI doesn't in certain locations on my corexy
+//--------------------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // includes
 include <inc/screwsizes.scad>
@@ -95,7 +104,7 @@ TDBWidth=45;			// board width
 TDBLength=70;			// board length
 TDBBracketWidth=Pi4BracketWidth;
 // Duet 3 Mini is the same size the Duet 2 (dc42) ------------------------
-D3MWidth = 100;		// width - Deut 3 Mini
+D3MWidth = 100;		// width - Duet 3 Mini
 D3MLength = 123;	// length
 D3MHoleOffset = 4;	//hole offset
 // Duet 3 3HC -----------------------------------------------------------------
@@ -105,19 +114,41 @@ D3MHoleOffset = 4;	//hole offset
 33HCBracketWidth=Pi4BracketWidth; // width of the bracket sides
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Duet3M(0,D3MWidth,D3MLength,D3MHoleOffset);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset
+//Duet3M(0,D3MWidth,D3MLength,D3MHoleOffset);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset
 //Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
 //Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
+// this lets you to use a usb c power cable
+//Duet3_6HCPi4C(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);  // don't use ExtTab if using post contruction nuts
+//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
 //Duet3_6HCCover(D3Width,D3Length);
 //Pi4Cover(0);
 //translate([145,0,0])		// move over if you set the above to not have the pi mount builtin
-//	Pi4StandAlone(0);		// a separate mount for just the pi4; args: ShortEnd=0,Screw=Yes2p5mmInsert(),DoSpacers=0,ShowPi=0
+//	Pi4StandAlone(0,Yes2p5mmInsert(Use2p5mmInsert),0,0);		// a separate mount for just the pi4
+//				ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0
 //Blower5150();
 //Blower4010();
 //ToolBoard1LC();
-//translate([70,0,0]) ToolDistibutionBoard(0,1);	// ShortEnd=0,Spacers=1
+//translate([70,0,0])
+//	ToolDistibutionBoard(0,0);	// ShortEnd=0,Spacers=1
+//AntennaMount(6.6); // arg is mount diameter
+//translate([-10,5,0])
+	Spacer(2,18,screw2,2.5);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module AntennaMount(HoleSize=6.5) {
+	difference() {
+		union() {
+			color("cyan") cubeX([20,20,PlatformThickness],2);
+			color("red") cubeX([20,PlatformThickness,20],2);
+		}
+		translate([10,11,-3]) color("blue") cylinder(h=10,d=screw5);
+		translate([10,11,PlatformThickness-1]) color("gold") cylinder(h=10,d=screw5hd);
+		translate([10,7,12]) rotate([90,0,0]) cylinder(h=10,d=HoleSize); // antenna hole
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -229,20 +260,22 @@ module ToolBoard1LC() { // this mounts to the Single-Titan-E3DV6.scad extruder
 		1LC_base();
 		translate([10,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 		translate([30,4,-MountThickness]) IRMountHoles(screw3);
+		translate([5,4,-MountThickness]) IRMountHoles(screw3);
 	}
 	difference() { // built in spacers
-		translate([10,13,0]) Spacers1LC(2);
-		translate([30,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount holes
+		translate([10,13,2]) Spacers1LC(0);
+		translate([30,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
+		translate([5,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module Spacers1LC(Extra=2,Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) { // Extra is more height
-	translate([0,0,0]) Spacer(1,MountThickness+Extra,Screw); // put them in one of the vent holes
-	translate([0,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw); // put them in one of the vent holes
-	translate([1LCHoleVOffset,0,0]) Spacer(1,MountThickness+Extra,Screw); // put them in one of the vent holes
-	translate([1LCHoleVOffset,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw); // put them in one of the vent holes
+	translate([0,0,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
+	translate([0,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
+	translate([1LCHoleVOffset,0,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
+	translate([1LCHoleVOffset,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +336,34 @@ module Duet3_6HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Co
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+module Duet3_6HCPi4C(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab,PI=0)
+{
+	Platform(Width,Length,HoleOffset);
+	PlatformMount(Width,Length,Offset2020,ExtTab);
+	difference() {
+		Duet3Supports(Width,Length,HoleOffset);
+		PlatformScrewMounts(Yes3mmInsert(Use3mmInsert,LargeBrassInsert),Width,Length,HoleOffset);
+	}
+	if(PI==1) {
+		translate([180,45.8,0]) rotate([0,0,0]) Pi4Mount();
+		difference() {
+			translate([135,45.8,0]) pi4CloseAttachmentC(0);
+			translate([125,47,MountThickness-1]) color("black") cube([10,10,15]);
+			translate([125,117,MountThickness-1]) color("gray") cube([10,10,15]);
+			translate([pi4Offset+2,pi4Offset+17,0]) Pi4MountHoles();
+		}
+	}	
+	if(Blower) translate([230,-5,0]) rotate([0,0,90]) Blower4010();
+	if(Blower2) translate([185,-5,0]) rotate([0,0,90]) Blower4010();
+	if(PI) {
+		translate([20,30,0]) Spacer(4,SpacerThickness,screw3); // put them in one of the vent holes
+		translate([70,30,0]) Spacer(4,SpacerThickness,screw2p5); // put them in one of the vent holes
+	}
+	if(!PI) translate([20,30,0]) Spacer(4,SpacerThickness,screw3); // put them in one of the vent holes
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 module Duet3_3HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab,PI=0)
 {
 	Platform3HC(Width,Length,HoleOffset);
@@ -316,7 +377,7 @@ module Duet3_3HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Co
 		translate([120,15.8,0]) rotate([0,0,0]) Pi4Mount();
 		//difference() {
 			translate([104,15.8,0]) pi4CloseAttachment(0);
-			//translate([125,47,MountThickness-1]) color("black") cube([10,10,15]);
+color("black") cube([10,10,15]);
 			//translate([125,117,MountThickness-1]) color("gray") cube([10,10,15]);
 		//}
 	}	
@@ -328,13 +389,14 @@ module Duet3_3HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Co
 	}
 	if(!PI) translate([20,30,0]) Spacer(4,SpacerThickness,screw3); // put them in one of the vent holes
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Spacer(Qty=1,Thickness=PCSpacerThickness,Screw=screw3) {
+module Spacer(Qty=1,Thickness=PCSpacerThickness,Screw=screw3,BottomSize=3) {
 	for(x = [0:Qty-1]) {
 		translate([0,x*15,0]) difference() {
 			color("cyan") hull() {
-				cylinder(h=0.5,d=Screw*3);
+				cylinder(h=0.5,d=Screw*BottomSize);
 				translate([0,0,Thickness]) cylinder(h=1,d=Screw*2);
 			}
 			translate([0,0,-2]) color("plum") cylinder(h=Thickness+5,d=Screw);
@@ -366,6 +428,20 @@ module pi4CloseAttachment(DoMiddle=1,Show=0) {
 	}
 	translate([-3,4.5,0]) color("white") cubeX([19,MountThickness,13.5],2);
 	translate([-3,75,0]) color("khaki") cubeX([19,MountThickness,13.5],2);
+	if(Show) %translate([8,15.5,2]) cube([6,56,6]);  // make sure the 40pin connector will fit
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module pi4CloseAttachmentC(DoMiddle=1,Show=0) { // to usea usb c cable
+	color("green") cubeX([49,Pi4BracketWidth-2,MountThickness],2);
+	translate([0,72,0]) color("plum") cubeX([49,Pi4BracketWidth-2,MountThickness],2); // vertical
+	if(DoMiddle) {
+		translate([0,38,0]) color("purple") cubeX([49,MountThickness,MountThickness],2);
+		translate([-3,38,0]) color("gray") cubeX([49,MountThickness,13.5],2);
+	}
+	translate([-3,4.5,0]) color("white") cubeX([49,MountThickness,13.5],2);
+	translate([-3,75,0]) color("khaki") cubeX([49,MountThickness,13.5],2);
 	if(Show) %translate([8,15.5,2]) cube([6,56,6]);  // make sure the 40pin connector will fit
 }
 
@@ -694,29 +770,26 @@ module BlowerAdapterScrew() {
 module Pi4Mount(Screw=Yes2p5mmInsert(Use2p5mmInsert),DoMiddle=0) {
 	difference() {
 		Pi4Base();
-		translate([3,0,0]) Pi4MountHoles(Screw);
+		translate([pi4Offset+2,pi4Offset+17,0]) Pi4MountHoles(Screw);
 	}
 	difference() {
 		pi4_support(DoMiddle);
-		translate([3,0,0]) Pi4MountHoles(Screw);
+		translate([pi4Offset+2,pi4Offset+17,0]) Pi4MountHoles(Screw);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Pi4StandAlone(ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0) {
+module Pi4StandAlone(ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,Show) {
 	if(ShortEnd) echo("short end"); else echo("long end");
+	if(Show) %translate([pi4Offset,pi4Offset+4,15]) cube([pi4VOffset,pi4HOffset,5]);
 	difference() {
-		Pi4Base(ShowPi);
-		translate([2.5,3,0]) Pi4MountHoles(Screw);
-	}
-	difference() {
-		Pi4StandAloneSupport(ShortEnd);
-		translate([2.5,3,0]) Pi4MountHoles(Screw+0.6);
-	}
-	difference() {
-		Pi4StandAloneMount(ShortEnd);
-		translate([2.5,3,0]) Pi4MountHoles(Screw+0.6);
+		union() {
+			Pi4Base(Show);
+			Pi4StandAloneSupport(ShortEnd);
+			Pi4StandAloneMount(ShortEnd);
+		}
+		translate([pi4Offset+2,pi4Offset+17,0]) Pi4MountHoles(Screw);
 	}
 	if(DoSpacers) {
 		if(ShortEnd) translate([70,5,0]) Spacer(4,PCSpacerThickness,screw2p5);
@@ -792,10 +865,10 @@ module Pi4CoverFan() { // add fan holes here
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module Pi4MountHoles(Screw=Yes2p5mmInsert(Use2p5mmInsert)) {
-	translate([pi4Offset,pi4Offset,-1]) color("white") cylinder(h=30,d=Screw);
-	translate([pi4Offset,pi4HOffset,-1]) color("black") cylinder(h=30,d=Screw);
-	translate([pi4Offset+pi4VOffset,pi4Offset,-1]) color("gray") cylinder(h=30,d=Screw);
-	translate([pi4Offset+pi4VOffset,pi4HOffset,-1]) color("red") cylinder(h=30,d=Screw);
+	translate([0,pi4HOffset,-5]) color("white") cylinder(h=30,d=Screw);
+	translate([pi4VOffset,0,-5]) color("black") cylinder(h=30,d=Screw);
+	translate([pi4VOffset,pi4HOffset,-5]) color("gray") cylinder(h=30,d=Screw);
+	translate([0,0,-5]) color("red") cylinder(h=30,d=Screw);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
