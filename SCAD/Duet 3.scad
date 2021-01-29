@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 11/25/20
+// last update 1/23/21
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -26,6 +26,7 @@
 // 11/14/20	- Added an antenna mount
 // 11/15/20	- Added another set of mount holes for ToolBoard1LC() so that it can be mounted on either side of Aero extruder
 // 11/25/20	- Added 18mm spacers to mount to mount tool board 1LC on rigth side of SingleAero
+// 1/23/21	- Adjusted 1LC mount holes to extruder to clear toolboard
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -129,12 +130,12 @@ D3MHoleOffset = 4;	//hole offset
 //				ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0
 //Blower5150();
 //Blower4010();
-//ToolBoard1LC();
+ToolBoard1LC();
 //translate([70,0,0])
 //	ToolDistibutionBoard(0,0);	// ShortEnd=0,Spacers=1
-//AntennaMount(6.6); // arg is mount diameter
-//translate([-10,5,0])
-	Spacer(2,18,screw2,2.5);
+//AntennaMount(7); // arg is mount diameter
+//Spacer(4,7,screw3+0.1,3);// bltouch fan mount spacer
+//Spacer(2,7,screw3+0.1,3);// 1LC mount spacer
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -142,11 +143,11 @@ module AntennaMount(HoleSize=6.5) {
 	difference() {
 		union() {
 			color("cyan") cubeX([20,20,PlatformThickness],2);
-			color("red") cubeX([20,PlatformThickness,20],2);
+			translate([2,0.3,2]) color("red") cube([16,2,20]);
 		}
 		translate([10,11,-3]) color("blue") cylinder(h=10,d=screw5);
 		translate([10,11,PlatformThickness-1]) color("gold") cylinder(h=10,d=screw5hd);
-		translate([10,7,12]) rotate([90,0,0]) cylinder(h=10,d=HoleSize); // antenna hole
+		translate([10,7,17]) rotate([90,0,0]) color("gray") cylinder(h=10,d=HoleSize); // antenna hole
 	}
 }
 
@@ -259,8 +260,8 @@ module ToolBoard1LC() { // this mounts to the Single-Titan-E3DV6.scad extruder
 	difference() {
 		1LC_base();
 		translate([10,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
-		translate([30,4,-MountThickness]) IRMountHoles(screw3);
-		translate([5,4,-MountThickness]) IRMountHoles(screw3);
+		translate([30,-1.5,-MountThickness]) IRMountHoles(screw3);
+		translate([5,-1.5,-MountThickness]) IRMountHoles(screw3);
 	}
 	difference() { // built in spacers
 		translate([10,13,2]) Spacers1LC(0);
@@ -281,7 +282,7 @@ module Spacers1LC(Extra=2,Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) { /
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module 1LC_base() {
-	color("cyan") cubeX([1LCWidth+4,1LCBracketWidth,MountThickness],2);
+	translate([0,-6,0]) color("cyan") cubeX([1LCWidth+4,1LCBracketWidth+5,MountThickness],2);
 	translate([0,1LCLength-Pi4BracketWidth,0]) color("blue") cubeX([1LCWidth,Pi4BracketWidth,MountThickness],2);
 	color("yellow") cubeX([1LCBracketWidth,1LCLength,MountThickness],2);
 	translate([1LCWidth+4-1LCBracketWidth,0,0]) color("purple") cubeX([1LCBracketWidth,1LCLength,MountThickness],2);

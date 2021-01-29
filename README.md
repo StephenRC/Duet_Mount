@@ -1,8 +1,11 @@
 # Duet_Mount
-Duet 085, 2 Wifi & Ethernet, DueX2 and DueX5 is in both
 
-Duet 3 6HC is in "duet2020 for Duet085-2-3 and PI.scad"
-
+Duet 085 and 2.scad: Duet085 and Duet 2 mounts
+Duet 3.scad: Duet 3 6HC, Toolboard 1LC,ToolDitribution Board, Duet 3 Mini+ and Pi 3/4 mounts
+Keyboard.scad: holds a small keyboard like a Rii mini wireless keyboard
+PanelDueMount.scad: has an angle mount to mount dc42' case, one of them requires M5 mounting holes in the back cover
+PIScreen.scad: case for the 7" Pi Touchsreen
+TouchScreen.scad: mount for a 10" touchscreen I got of ebay.
 
 https://creativecommons.org/licenses/by-nc/3.0/
 
