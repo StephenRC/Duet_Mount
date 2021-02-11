@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 1/23/21
+// last update 1/31/21
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -27,6 +27,7 @@
 // 11/15/20	- Added another set of mount holes for ToolBoard1LC() so that it can be mounted on either side of Aero extruder
 // 11/25/20	- Added 18mm spacers to mount to mount tool board 1LC on rigth side of SingleAero
 // 1/23/21	- Adjusted 1LC mount holes to extruder to clear toolboard
+// 1/31/21	- Added a circuit breaker mount
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -113,6 +114,10 @@ D3MHoleOffset = 4;	//hole offset
 3HCLength=100;			// length
 3HCHoleOffset=91;		// hole offset
 33HCBracketWidth=Pi4BracketWidth; // width of the bracket sides
+//---------------------------------------------------------------------------
+CircuitBreakerDiameter=11;
+CircuitBreakerWidth=15;
+CircuitBreakerLength=45; // includes connector clearance
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Duet3M(0,D3MWidth,D3MLength,D3MHoleOffset);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset
@@ -130,12 +135,29 @@ D3MHoleOffset = 4;	//hole offset
 //				ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0
 //Blower5150();
 //Blower4010();
-ToolBoard1LC();
+//ToolBoard1LC();
 //translate([70,0,0])
 //	ToolDistibutionBoard(0,0);	// ShortEnd=0,Spacers=1
 //AntennaMount(7); // arg is mount diameter
 //Spacer(4,7,screw3+0.1,3);// bltouch fan mount spacer
 //Spacer(2,7,screw3+0.1,3);// 1LC mount spacer
+CircuitBreaker();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module CircuitBreaker(Diameter=CircuitBreakerDiameter) {  // 5A circuit braker KUOYUH 88 Series
+	difference() {
+		union() {
+			color("cyan") cubeX([CircuitBreakerWidth+5,Diameter*5,4],2);
+			color("blue") cubeX([4,CircuitBreakerDiameter*5,CircuitBreakerLength],2);
+		}
+		translate([(CircuitBreakerWidth+5)/2+1.5,(Diameter*5)/2,-3]) cylinder(h=10,d=Diameter);
+		translate([-3,10,CircuitBreakerLength-8]) rotate([0,90,0]) color("plum") cylinder(h=10,d=screw5);
+		translate([2,10,CircuitBreakerLength-8]) rotate([0,90,0]) color("gray") cylinder(h=5,d=screw5hd);
+		translate([-3,40,CircuitBreakerLength-8]) rotate([0,90,0]) color("gray") cylinder(h=10,d=screw5);
+		translate([2,40,CircuitBreakerLength-8]) rotate([0,90,0]) color("plum") cylinder(h=5,d=screw5hd);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
