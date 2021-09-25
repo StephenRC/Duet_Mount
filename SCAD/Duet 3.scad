@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 2/23/21
+// last update 5/6/21
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -33,6 +33,7 @@
 // 2/15/21	- Added ToolBoard1LCEXOSlide() to mount the 1LC on EXOSlide under the hotend mount
 // 2/29/21	- Added ability to switch the side the Pi mounts on the Duet 3 Mini mount
 // 2/23/21	- Added EXIslide mount for 1LC
+// 5/6/21	- Added MountSpacerThickness1LC for the distance needed between LC and mount, 1LC v1.1 needs at least 1.5mm
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -77,6 +78,7 @@ LargeBrassInsert=1;
 //------------------------------------------------------------------------------------------------------------
 PlatformThickness=5;	// thickness of platform
 MountThickness=5;		// thickness of mount
+MountSpacerThickness1LC=2; // distance needed between board and mount
 CoverThickness=3;		// thickness of the covers
 SupportThickness=5;		// thickness of supports
 PCSpacerThickness=PlatformThickness; // thickness of the pc board spacers
@@ -143,7 +145,7 @@ CircuitBreakerLength=45; // includes connector clearance
 //translate([100,0,0]) mirror([1,0,0]) Blower5150();
 //Blower4010();
 //ToolBoard1LC();
-ToolBoard1LCEXOSlide(1);
+ToolBoard1LCEXOSlide();
 //translate([70,0,0])
 //	ToolDistibutionBoard(0,0);	// ShortEnd=0,Spacers=1
 //AntennaMount(7); // arg is mount diameter
@@ -327,52 +329,35 @@ module ToolBoard1LC() { // this mounts to the Single-Titan-E3DV6.scad extruder
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-module ToolBoard1LCEXOSlide(Side=0) { // this mounts to the Single-Titan-E3DV6.scad extruder
+module ToolBoard1LCEXOSlide() { // this mounts to the Single-Titan-E3DV6.scad extruder
 	difference() {
 		1LC_base();
 		translate([10,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
-		if(!Side) {
-			translate([25,2,-3]) rotate([0,0,90]) {
-				color("red") cylinder(h=10,d=screw4);
-				translate([0,20,0]) color("blue") cylinder(h=10,d=screw4);
-			}
-			translate([25,2,1.5]) rotate([0,0,90]) {
-				color("blue") cylinder(h=5,d=screw4hd);
-				translate([0,20,0]) color("red") cylinder(h=5,d=screw4hd);
-			}
-		} else {
-			translate([45,2,-3]) rotate([0,0,90]) {
-				color("red") cylinder(h=10,d=screw4);
-				translate([0,20,0]) color("blue") cylinder(h=10,d=screw4);
-			}
-			translate([45,2,1.5]) rotate([0,0,90]) {
-				color("blue") cylinder(h=5,d=screw4hd);
-				translate([0,20,0]) color("red") cylinder(h=5,d=screw4hd);
-			}
+		translate([35,2,0]) rotate([0,0,90]) {
+			translate([0,0,-3]) color("red") cylinder(h=10,d=screw4);
+			translate([0,20,-3]) color("blue") cylinder(h=10,d=screw4);
+			translate([0,0,MountThickness/2]) color("blue") cylinder(h=5,d=screw4hd);
+			translate([0,20,MountThickness/2]) color("red") cylinder(h=5,d=screw4hd);
 		}
 	}
-	difference() { // built in spacers
-		translate([10,13,2]) Spacers1LC(0);
-		translate([30,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
-		translate([5,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
-	}
+	translate([10,13,2]) Spacers1LC(0); // built in spacers
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module EXOSlideMountHoles(Screw=screw4) {
-	color("red") cylinder(h=50,d=Screw);
-	translate([20,0,0]) color("blue") cylinder(h=50,d=Screw);
-	translate([40,0,0]) color("lightgray") cylinder(h=50,d=Screw);
-	translate([60,0,0]) color("black") cylinder(h=50,d=Screw);
-}
+//module EXOSlideMountHoles(Screw=screw4) {
+//	color("red") cylinder(h=50,d=Screw);
+//	translate([20,0,0]) color("blue") cylinder(h=50,d=Screw);
+//	translate([40,0,0]) color("lightgray") cylinder(h=50,d=Screw);
+//	translate([60,0,0]) color("black") cylinder(h=50,d=Screw);
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Spacers1LC(Extra=2,Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) { // Extra is more height
-	translate([0,0,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
-	translate([0,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
-	translate([1LCHoleVOffset,0,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
-	translate([1LCHoleVOffset,1LCHoleHOffset,0]) Spacer(1,MountThickness+Extra,Screw,2.5);
+module Spacers1LC(Extra=MountSpacerThickness1LC,Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert)) { // Extra is more height
+	translate([0,0,0]) Spacer(1,MountThickness+MountSpacerThickness1LC,Screw,2.5);
+	translate([0,1LCHoleHOffset,0]) Spacer(1,MountThickness+MountSpacerThickness1LC,Screw,2.5);
+	translate([1LCHoleVOffset,0,0]) Spacer(1,MountThickness+MountSpacerThickness1LC,Screw,2.5);
+	translate([1LCHoleVOffset,1LCHoleHOffset,0]) Spacer(1,MountThickness+MountSpacerThickness1LC,Screw,2.5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
