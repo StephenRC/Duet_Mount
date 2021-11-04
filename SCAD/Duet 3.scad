@@ -95,7 +95,7 @@ D3HoleOffset=4.3;	// corner hole offset
 //------------------------------------------------------------------------------------------------------------
 Pi4Width=56;		// width - Raspberry Pi 3 and Pi 4
 Pi4Length=85;		// length
-Pi4BracketWidth=15; // width of the bracket sides
+Pi4BracketWidth=10; // width of the bracket sides
 pi4Offset=3.5;		// offset of the holes from the side of the pc board
 pi4VOffset=49;		// vertical hole offset
 pi4HOffset=58;		// horizontal hole offset
@@ -145,9 +145,9 @@ CircuitBreakerLength=45; // includes connector clearance
 //translate([100,0,0]) mirror([1,0,0]) Blower5150();
 //Blower4010();
 //ToolBoard1LC();
-ToolBoard1LCEXOSlide();
+//ToolBoard1LCEXOSlide();
 //translate([70,0,0])
-//	ToolDistibutionBoard(0,0);	// ShortEnd=0,Spacers=1
+	ToolDistibutionBoard(1,0);	// arg one: ShortEnd,arg two: Spacers
 //AntennaMount(7); // arg is mount diameter
 //Spacer(4,7,screw3+0.1,3);// bltouch fan mount spacer
 //		Qty=1,Thickness=PCSpacerThickness,Screw=screw3,BottomSize=3
@@ -227,9 +227,12 @@ module ToolDistibutionBoard(ShortEnd=0,Spacers=1) { // this mounts to the Single
 		translate([TDBHoleBOffset,TDBHoleBOffset+MountThickness,0])
 			ToolDistibutionBoardMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 	}
-	ToolDistibutionBoardMount(ShortEnd);
-	ToolDistibutionBoardSupport(ShortEnd);
-	if(Spacers) translate([-8,8,0]) Spacer(4,MountThickness,screw3);;
+		ToolDistibutionBoardMount(ShortEnd);
+	difference() {
+		ToolDistibutionBoardSupport(ShortEnd);
+		translate([TDBHoleBOffset,TDBHoleBOffset+MountThickness,0])
+			ToolDistibutionBoardMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+	}if(Spacers) translate([-8,8,0]) Spacer(4,MountThickness,screw3);;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -288,25 +291,31 @@ module ToolDistibutionBoardMount(ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert)
 module ToolDistibutionBoardSupport(ShortEnd=0) {
 	if(ShortEnd) {
 		difference() {
-			translate([12,0,-6]) rotate([-6,0,0]) color("white") cubeX([MountThickness,TDBLength-3,20],2);
-			translate([11,-2.5,-18]) color("salmon") cube([MountThickness+5,TDBLength+5,20]);
-			translate([8,MountThickness+14,MountThickness+6]) color("khaki") rotate([90,0,0])  cylinder(h=15,d=screw5hd);
+			translate([11,0,0]) color("green") hull() {
+				color("white") cubeX([5,5,20],2);
+				translate([0,TDBLength,0]) color("white") cubeX([5,5,5],2);
+			}
+			translate([8,MountThickness+9,MountThickness+6]) color("pink") rotate([90,0,0])  cylinder(h=10,d=screw5hd);
 		}
 		difference() {
-			translate([29,0,-6]) rotate([-6,0,0]) color("gray") cubeX([MountThickness,TDBLength-3,20],2);
-			translate([28,0,-18]) color("gray") cube([MountThickness+3,TDBLength+5,20]);
-			translate([38,MountThickness+14,MountThickness+6]) color("green") rotate([90,0,0])  cylinder(h=15,d=screw5hd);
+			translate([29,0,0]) color("gray") hull() {
+				translate([0,0,0]) color("white") cubeX([5,5,20],2);
+				translate([0,TDBLength,0]) color("white") cubeX([5,5,5],2);
+			}
+			translate([38,MountThickness+9,MountThickness+6]) color("plum") rotate([90,0,0])  cylinder(h=10,d=screw5hd);
 		}
 	} else {
-		difference() {
-			translate([-4,2,0]) rotate([0,20,0]) color("white") cubeX([TDBWidth-3,MountThickness,20],2);
-			translate([-6,0,-18]) color("salmon") cube([TDBWidth+10,MountThickness+5,20]);
-			translate([-6,0,0]) color("gray") cube([MountThickness+5,MountThickness+5,20]);
+		translate([0,8,0]) color("green") hull() {
+			color("white") cubeX([5,5,20],2);
+			translate([TDBWidth-5,0,0]) color("white") cubeX([5,5,5],2);
 		}
-		translate([0,62,0]) difference() {
-			translate([-4,2,0]) rotate([0,20,0]) color("white") cubeX([TDBWidth-3,MountThickness,20],2);
-			translate([-6,0,-18]) color("salmon") cube([TDBWidth+10,MountThickness+5,20]);
-			translate([-6,0,0]) color("gray") cube([MountThickness+5,MountThickness+5,20]);
+		translate([0,TDBLength/2,0]) color("white") hull() {
+			color("white") cubeX([5,5,20],2);
+			translate([TDBWidth-5,0,0]) color("white") cubeX([5,5,5],2);
+		}
+		translate([0,TDBLength-7,0]) color("gray") hull() {
+			translate([0,0,0]) color("white") cubeX([5,5,20],2);
+			translate([TDBWidth-5,0,0]) color("white") cubeX([5,5,5],2);
 		}
 	}
 }
@@ -315,15 +324,13 @@ module ToolDistibutionBoardSupport(ShortEnd=0) {
 
 module ToolBoard1LC() { // this mounts to the Single-Titan-E3DV6.scad extruder
 	difference() {
-		1LC_base();
-		translate([10,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+		union() {
+			1LC_base();
+			translate([8,13,0]) Spacers1LC(0);
+		}
+		translate([8,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 		translate([30,-1.5,-MountThickness]) IRMountHoles(screw3);
 		translate([5,-1.5,-MountThickness]) IRMountHoles(screw3);
-	}
-	difference() { // built in spacers
-		translate([10,13,2]) Spacers1LC(0);
-		translate([30,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
-		translate([5,4,-MountThickness]) IRMountHoles(screw3); // make clearance for the extruder mount spacers
 	}
 }
 
@@ -331,8 +338,11 @@ module ToolBoard1LC() { // this mounts to the Single-Titan-E3DV6.scad extruder
 
 module ToolBoard1LCEXOSlide() { // this mounts to the Single-Titan-E3DV6.scad extruder
 	difference() {
-		1LC_base();
-		translate([10,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+		union() {
+			1LC_base();
+			translate([8,13,0]) Spacers1LC(0); // built in spacers
+		}
+		translate([8,13,0]) 1LCMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
 		translate([35,2,0]) rotate([0,0,90]) {
 			translate([0,0,-3]) color("red") cylinder(h=10,d=screw4);
 			translate([0,20,-3]) color("blue") cylinder(h=10,d=screw4);
@@ -340,7 +350,6 @@ module ToolBoard1LCEXOSlide() { // this mounts to the Single-Titan-E3DV6.scad ex
 			translate([0,20,MountThickness/2]) color("red") cylinder(h=5,d=screw4hd);
 		}
 	}
-	translate([10,13,2]) Spacers1LC(0); // built in spacers
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

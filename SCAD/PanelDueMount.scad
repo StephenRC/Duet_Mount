@@ -17,7 +17,7 @@
 // 11/23/20	- Added an anlge version to allow acces to the sd card slot, requires mount holes in dc42's paneldue lid
 ///////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
-use <inc/cubeX.scad>
+include <bosl2/std.scad>
 include <inc/brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -48,16 +48,22 @@ LargeInsert=1;
 								// 5 arg is angle of bracket if 4th arg is 0 (default: 30)
 //tabbedbracket(2,33,124,60,0);		// for a 7" PanelDue on a 2040
 //DC42Spacer(6,2);
-//AngleMountPanelDue();
+//AngleMountPanelDue(0);
 AngleMountPanelDueSD(1);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//module cubeX(Size,Round) {
+//	cuboid(Size,rounding=Round,p1=[0,0]);
+//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module AngleMountPanelDue(NoExtMount=0) {
 	difference() {
 		color("cyan") hull() {
-			cubeX([130,15,1],1);
-			translate([0,13,8]) cubeX([130,1,1],1);
+			cuboid([130,15,1],rounding=0,5,p1=[0,0]);
+			translate([0,13,8]) cuboid([130,1,1],rounding=0.5,p1=[0,0]);
 		}
 		if(!NoExtMount) {
 			translate([25,10,-5]) color("black")cylinder(d=screw5,h=20);
@@ -76,21 +82,19 @@ module AngleMountPanelDue(NoExtMount=0) {
 
 module AngleMountPanelDueSD(HorizontalMount=0) {
 	difference() {
-		difference() {
-			union() {
-				if(HorizontalMount) color("cyan") cubeX([130,20+thickness,thickness],2);
-				color("blue") cubeX([130,thickness,33+thickness],2);
-				translate([0,-4,25]) color("pink") cubeX([130,thickness+3,8+thickness],2);
-				translate([0,-2,25]) rotate([90,0,0]) AngleMountPanelDue(1);
-				translate([0,-2,26]) color("cyan") hull() {
-					translate([0,-2,0]) cubeX([130,6,1],1);
-					translate([0,3,-6]) cubeX([130,1,1],1);
-				}
+		union() {
+			if(HorizontalMount) color("cyan") cuboid([130,20+thickness,thickness],rounding=1,p1=[0,0]);
+			color("blue") cuboid([130,thickness,33+thickness],rounding=1,p1=[0,0]);
+			translate([0,-3,25]) color("pink") cuboid([130,thickness+1,8+thickness],rounding=1,p1=[0,0]);
+			translate([0,-2,25]) rotate([90,0,0]) AngleMountPanelDue(1);
+			translate([0,-2.81,26]) color("gray") hull() {
+				translate([0,-1,0]) cuboid([130,6,1],rounding=0.5,p1=[0,0]);
+				translate([0,3,-6]) cuboid([130,1.5,1],rounding=0.5,p1=[0,0]);
 			}
-			translate([15,10,42]) rotate([125,0,0]) {
-				translate([0,0,0]) color("white") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
-				translate([100,0,0]) color("pink") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
-			}
+		}
+		translate([15,10,42]) rotate([125,0,0]) {
+			translate([0,0,0]) color("white") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+			translate([100,0,0]) color("pink") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
 		}
 		if(HorizontalMount) {
 			translate([10,10+thickness,-3]) color("red") cylinder(h=15,d=screw5); 
