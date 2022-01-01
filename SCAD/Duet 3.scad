@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 5/6/21
+// last update 12/9/21
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 4/5/20	- Duet3 platform, don't have a Duet 3 at this time, so PORTCOVER HAS NOT BEEN TESTED
 // 4/7/20	- Added ability to use 3mm brass inserts, renamed variables
@@ -34,6 +34,7 @@
 // 2/29/21	- Added ability to switch the side the Pi mounts on the Duet 3 Mini mount
 // 2/23/21	- Added EXIslide mount for 1LC
 // 5/6/21	- Added MountSpacerThickness1LC for the distance needed between LC and mount, 1LC v1.1 needs at least 1.5mm
+// 12/9/21	- Made antenna mount stronger, began conversion to BOSL2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -67,7 +68,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // includes
 include <inc/screwsizes.scad>
-use <inc/cubeX.scad> // http://www.thingiverse.com/thing:112008
+//use <inc/cubeX.scad> // http://www.thingiverse.com/thing:112008
+include <bosl2/std.scad>
 include <inc/brassinserts.scad>
 $fn=50;		// 100 takes a long, long time to render
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,21 +149,27 @@ CircuitBreakerLength=45; // includes connector clearance
 //ToolBoard1LC();
 //ToolBoard1LCEXOSlide();
 //translate([70,0,0])
-	ToolDistibutionBoard(1,0);	// arg one: ShortEnd,arg two: Spacers
-//AntennaMount(7); // arg is mount diameter
+//	ToolDistibutionBoard(1,0);	// arg one: ShortEnd,arg two: Spacers
+AntennaMount(7,1); // 1st arg is mount diameter
 //Spacer(4,7,screw3+0.1,3);// bltouch fan mount spacer
 //		Qty=1,Thickness=PCSpacerThickness,Screw=screw3,BottomSize=3
 //Spacer(2,7,screw3+0.1,3);// 1LC mount spacer
 //Spacer(4,6,screw2+0.1,3);// PI mount spacer
 //CircuitBreaker();
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module cubeX(Size,Round) {
+	cuboid(Size,rounding=Round,p1=[0,0]);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module CircuitBreaker(Diameter=CircuitBreakerDiameter) {  // 5A circuit braker KUOYUH 88 Series
 	difference() {
 		union() {
-			color("cyan") cubeX([CircuitBreakerWidth+5,Diameter*5,4],2);
-			color("blue") cubeX([4,CircuitBreakerDiameter*5,CircuitBreakerLength],2);
+			color("cyan") cuboid([CircuitBreakerWidth+5,Diameter*5,4],rounding=2,p1=[0,0]);
+			color("blue") cuboid([4,CircuitBreakerDiameter*5,CircuitBreakerLength],rounding=2,p1=[0,0]);
 		}
 		translate([(CircuitBreakerWidth+5)/2+1.5,(Diameter*5)/2,-3]) cylinder(h=10,d=Diameter);
 		translate([-3,10,CircuitBreakerLength-8]) rotate([0,90,0]) color("plum") cylinder(h=10,d=screw5);
@@ -173,15 +181,35 @@ module CircuitBreaker(Diameter=CircuitBreakerDiameter) {  // 5A circuit braker K
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module AntennaMount(HoleSize=6.5) {
-	difference() {
-		union() {
-			color("cyan") cubeX([20,20,PlatformThickness],2);
-			translate([2,0.3,2]) color("red") cube([16,2,20]);
+module AntennaMount(HoleSize=6.5,2HoleMount=0) {
+	if(2HoleMount) {
+		difference() {
+			union() {
+				color("cyan") hull() {
+					cuboid([40,25,PlatformThickness-1],rounding=2);
+					translate([0,11.5,12]) cuboid([10,2,2],rounding=0.5);
+				}
+			}
+			translate([0,15,7.5]) rotate([90,0,0]) color("gray") cylinder(h=30,d=HoleSize); // antenna hole
+			translate([0,11,7.5]) rotate([90,0,0]) color("red") cylinder(h=20,d=HoleSize+3.4,$fn=6); // antenna hole
+			translate([10,-2.5,-4]) color("blue") cylinder(h=20,d=screw5);
+			translate([10,-2.5,PlatformThickness/2-1]) color("gold") cylinder(h=10,d=screw5hd);
+			translate([-10,-2.5,-4]) color("gold") cylinder(h=20,d=screw5);
+			translate([-10,-2.5,PlatformThickness/2-1]) color("blue") cylinder(h=10,d=screw5hd);
 		}
-		translate([10,11,-3]) color("blue") cylinder(h=10,d=screw5);
-		translate([10,11,PlatformThickness-1]) color("gold") cylinder(h=10,d=screw5hd);
-		translate([10,7,17]) rotate([90,0,0]) color("gray") cylinder(h=10,d=HoleSize); // antenna hole
+	} else {
+		difference() {
+			union() {
+				color("cyan") hull() {
+					cuboid([20,25,PlatformThickness-1],rounding=2);
+					translate([0,11.5,12]) cuboid([10,2,2],rounding=0.5);
+				}
+			}
+			translate([0,15,7.5]) rotate([90,0,0]) color("gray") cylinder(h=30,d=HoleSize); // antenna hole
+			translate([0,11,7.5]) rotate([90,0,0]) color("red") cylinder(h=20,d=HoleSize+3.4,$fn=6); // antenna hole
+			translate([0,-2.5,-4]) color("blue") cylinder(h=20,d=screw5);
+			translate([0,-2.5,PlatformThickness/2-1]) color("gold") cylinder(h=10,d=screw5hd);
+		}
 	}
 }
 
