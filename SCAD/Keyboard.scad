@@ -2,16 +2,19 @@
 // keyboard.scad
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Created 7/19/2020
-// Last Update 8/20/20
+// Last Update 1/6/22
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// https://creativecommons.org/licenses/by-sa/4.0/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 7/19/20	- Keybaord platform
 // 7/20/20	- Keyboard bracing
 // 7/23/20	- Added a second version of braces to not use the keyboard()
 // 8/1/20	- changed the SimpleKeyboardBraces() to hold the keyboard at an angle
 // 8/20/20	- changed simplekeyboradbraces to a more solid one
+// 1/6/22	- BOSL2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
-include <inc/cubex.scad>
+include <bosl2/std.scad>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $fn=50;
 Length=260; // sized for the Rii 12+ Mini Wireless Keyboard Mouse Combo
@@ -28,23 +31,23 @@ SimpleKeyboardBraces(3);
 
 module KeyboardPlatform() {
 	difference() {
-		color("cyan") cubeX([Length+Thickness*2,Width,Thickness],1);
+		color("cyan") cuboid([Length+Thickness*2,Width,Thickness],rounding=1,p1=[0,0]);
 		MakeHoles();
 	}
-	color("blue") cubeX([Length+Thickness*2,Thickness,Thickness*2],1);
-	color("red") cubeX([Thickness,Width,Thickness*2],1);
-	translate([Length+Thickness,0,0]) color("khaki") cubeX([Thickness,Width,Thickness*2],1);
+	color("blue") cuboid([Length+Thickness*2,Thickness,Thickness*2],rounding=1,p1=[0,0]);
+	color("red") cuboid([Thickness,Width,Thickness*2],rounding=1,p1=[0,0]);
+	translate([Length+Thickness,0,0]) color("khaki") cuboid([Thickness,Width,Thickness*2],rounding=1,p1=[0,0]);
 	difference() {
-		translate([0,Width-2,0]) color("plum") cubeX([20,40,Thickness],1);
+		translate([0,Width-2,0]) color("plum") cuboid([20,40,Thickness],rounding=1,p1=[0,0]);
 		translate([10,Width+25,0]) color("red") cylinder(h=10,d=screw5);
 	}
 	difference() {
-		translate([Length/2-30,Width-2,0]) color("purple") cubeX([60,40,Thickness],1);
+		translate([Length/2-30,Width-2,0]) color("purple") cuboid([60,40,Thickness],rounding=1,p1=[0,0]);
 		translate([Length/2-15,Width+25,0]) color("gray") cylinder(h=10,d=screw5);
 		translate([Length/2+15,Width+25,0]) color("pink") cylinder(h=10,d=screw5);
 	}
 	difference() {
-		translate([Length-20+Thickness*2,Width-2,0]) color("black") cubeX([20,40,Thickness],1);
+		translate([Length-20+Thickness*2,Width-2,0]) color("black") cuboid([20,40,Thickness],rounding=1,p1=[0,0]);
 		translate([Length-10+Thickness*2,Width+25,0]) color("white") cylinder(h=10,d=screw5);
 	}
 }
@@ -66,14 +69,16 @@ module PlatformBraces(Qty=1) {
 	for(x = [0 : Qty-1]) {
 		translate([x*45,0,0]) {
 			difference() {
-				color("blue") cubeX([40,Thickness,40],1);
+				color("blue") cuboid([40,Thickness,40],rounding=1,p1=[0,0]);
 				translate([10,0,10]) ScrewHoles(screw5);
 			}
-			color("red") cubeX([Thickness,Width,Thickness],1);
-			translate([40-Thickness,0,0]) color("cyan") cubeX([Thickness,Width,Thickness],1);
-			translate([0,0,40-Thickness]) color("plum") rotate([-21,0,0]) cubeX([Thickness,Width+5,Thickness],1);
-			translate([40-Thickness,0,40-Thickness]) color("gray") rotate([-21,0,0]) cubeX([Thickness,Width+5,Thickness],1);
-			translate([0,Width-Thickness,0]) color("pink") cubeX([40,Thickness,Thickness],1);
+			color("red") cuboid([Thickness,Width,Thickness],rounding=1,p1=[0,0]);
+			translate([40-Thickness,0,0]) color("cyan") cuboid([Thickness,Width,Thickness],rounding=1,p1=[0,0]);
+			translate([0,0,40-Thickness]) color("plum") rotate([-21,0,0]) 
+				cuboid([Thickness,Width+5,Thickness],rounding=1,p1=[0,0]);
+			translate([40-Thickness,0,40-Thickness]) color("gray") rotate([-21,0,0]) 
+				cuboid([Thickness,Width+5,Thickness],rounding=1,p1=[0,0]);
+			translate([0,Width-Thickness,0]) color("pink") cuboid([40,Thickness,Thickness],rounding=1,p1=[0,0]);
 		}
 	}
 }
@@ -86,9 +91,11 @@ module SimpleKeyboardBraces(Qty=1) {
 			translate([0,0,x*50]) {
 				difference() {
 					union() {
-						translate([0,0,0]) color("blue") cubeX([20,Thickness,40.5],2); // 2040 mounting
-						translate([0,0,36]) rotate([-5,0,0]) color("cyan") cubeX([20,Width,Thickness],2); //  keyboard shelf
-						translate([0,Width-Thickness,28]) rotate([-5,0,0]) color("pink") cubeX([20,Thickness,12],2);
+						translate([0,0,0]) color("blue") cuboid([20,Thickness,40.5],rounding=2,p1=[0,0]); // 2040 mounting
+						translate([0,0,36]) rotate([-5,0,0]) color("cyan") 
+							cuboid([20,Width,Thickness],rounding=2,p1=[0,0]); //  keyboard shelf
+						translate([0,Width-Thickness,28]) rotate([-5,0,0]) color("pink") 
+							cuboid([20,Thickness,12],rounding=1,p1=[0,0]);
 					}
 					translate([10,0,9]) ScrewHoles(screw5);
 				}
@@ -105,16 +112,16 @@ module SimpleKeyboardBraces(Qty=1) {
 
 module SimpleKeyboardSupport() {
 	difference() {
-		color("red") rotate([17,0,0]) cubeX([Thickness,Width+4,10],2);
-		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cubeX([Thickness*2,120,Thickness*3],1);
-		translate([-4,-9,0]) rotate([0,0,0]) color("white") cubeX([Thickness*2,10,Thickness*3],1);
+		color("red") rotate([17,0,0]) cuboid([Thickness,Width+4,10],rounding=2,p1=[0,0]);
+		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cuboid([Thickness*2,120,Thickness*3],rounding=1,p1=[0,0]);
+		translate([-4,-9,0]) rotate([0,0,0]) color("white") cuboid([Thickness*2,10,Thickness*3],rounding=1,p1=[0,0]);
 	}
 	translate([15,0,0]) difference() {
-		color("black") rotate([17,0,0]) cubeX([Thickness,Width+4,10],2);
-		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cubeX([Thickness*2,120,Thickness*3],1);
-		translate([-4,-9,0]) rotate([0,0,0]) color("khaki") cubeX([Thickness*2,10,Thickness*3],1);
+		color("black") rotate([17,0,0]) cuboid([Thickness,Width+4,10],rounding=2,p1=[0,0]);
+		translate([-3,0,40]) rotate([-5,0,0]) color("gray") cuboid([Thickness*2,120,Thickness*3],rounding=1,p1=[0,0]);
+		translate([-4,-9,0]) rotate([0,0,0]) color("khaki") cuboid([Thickness*2,10,Thickness*3],rounding=1,p1=[0,0]);
 	}
-	translate([0,40,13.25]) cubeX([20,Thickness,9.75],2);
+	translate([0,40,13.25]) cuboid([20,Thickness,9.75],rounding=2,p1=[0,0]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

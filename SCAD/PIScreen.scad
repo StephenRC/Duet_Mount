@@ -2,8 +2,10 @@
 // PIScreen.scad - something simple to hold dc42's PanelDue case to 2020 and my PI Touchscreen case
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 8/17/20
+// last update 1/6/22
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// https://creativecommons.org/licenses/by-sa/4.0/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 8/4/16	- changed bracket to take args for size of paneldue case
 // 8/13/16	- width of bracket now based on depth of PanelDue case
 //		 	 can now rotate the tabbed version 90 degrees
@@ -14,9 +16,10 @@
 // 6/5/20	- Added use of a brass insert
 // 6/20/20	- Added mount for the PI Touchscreed case I made nad put this in a seperate file
 // 8/17/20	- Added the Pi touchscreen modules that were in the "Duet2020 for Duet 3.scad"
+// 1/6/22	- BOSL2	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 include <inc/screwsizes.scad>
-use <inc/cubeX.scad>
+use <bosl2/std.scad>
 include <inc/brassinserts.scad>
 $fn=50;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,8 +62,8 @@ PI7Touchscreen(0);  // 0: full case; 1-4: test print with one of the walls
 
 module TestPrintHoles() {
 	difference() {
-		color("cyan") cubeX([TSScrewHOffset+10,TSScrewVOffset+10,2],1);
-		translate([10,10,-2]) color("gray") cubeX([TSScrewHOffset-10,TSScrewVOffset-10,6],1);
+		color("cyan") cuboid([TSScrewHOffset+10,TSScrewVOffset+10,2],rounding=1,p1=[0,0]);
+		translate([10,10,-2]) color("gray") cuboid([TSScrewHOffset-10,TSScrewVOffset-10,6],rounding=1,p1=[0,0]);
 		translate([5,5,0]) TSMountScrews(screw3);
 	}
 	translate([5,5,0]) ScreenSpacer(TSSpacerDepth);
@@ -103,7 +106,7 @@ module PiTouchscreenBracket(Qty=1,MountHoles=1,p_depth,p_height,m_depth,Angle=30
 
 module BracketPI(p_height,MntHoles=1) {	// 1st arg: depth, 2nd arg: height
 	difference() {
-		color("lightgray") cubeX([p_height+Clearance+BracketThickness*2+5,5,20],2);
+		color("lightgray") cuboid([p_height+Clearance+BracketThickness*2+5,5,20],rounding=2,p1=[0,0]);
 		if(MntHoles) {
 			translate([25,3,10]) rotate([90,90,0]) TSMountScrews(screw3);
 			translate([3.5,0,54.5]) rotate([90,90,0]) MountCSHoles();
@@ -121,7 +124,7 @@ module Sample2020(Show=0) {
 
 module thetab(p_de,p_he,m_de,Thickness=BracketThickness) {
 	difference() {
-		translate([-m_de+4,0,0]) color("blue") cubeX([m_de,Thickness,p_de],2);
+		translate([-m_de+4,0,0]) color("blue") cuboid([m_de,Thickness,p_de],rounding=2,p1=[0,0]);
 		translate([-m_de+12,10,7]) rotate([90,0,0]) color("white") cylinder(h=Thickness*2,d=screw5);
 		translate([-m_de+12,10,p_de-7]) rotate([90,0,0]) color("gold") cylinder(h=Thickness*2,d=screw5);
 	}
@@ -131,12 +134,12 @@ module thetab(p_de,p_he,m_de,Thickness=BracketThickness) {
 
 module PITab(p_de,p_he,m_de,Thickness=BracketThickness) {
 	difference() {
-		translate([-m_de+4,0,0]) color("blue") cubeX([m_de,Thickness,20],2);
+		translate([-m_de+4,0,0]) color("blue") cuboid([m_de,Thickness,20],rounding=2,p1=[0,0]);
 		translate([-m_de+12,10,10]) rotate([90,0,0]) color("white") cylinder(h=Thickness*2,d=screw5);
 		translate([-m_de+12,9,10]) rotate([90,0,0]) color("gold") cylinder(h=5,d=screw5hd);
 	}
 	difference() {
-		translate([-41,-20.5]) color("pink") cubeX([Thickness,25,20],2);
+		translate([-41,-20.5]) color("pink") cuboid([Thickness,25,20],rounding=2,p1=[0,0]);
 		translate([-45,-10,10]) rotate([0,90,0]) color("black") cylinder(h=Thickness*3,d=screw5);
 		translate([-36,-10,10]) rotate([0,90,0]) color("white") cylinder(h=5,d=screw5hd);
 	}
@@ -177,11 +180,11 @@ module Screen(Thickness=TSScreenThickness,Test=0) {
 
 module PIScreenBase(Test=0,Depth=TSSpacerDepth-TSScreenThickness) {
 	difference() {
-		translate([-2,-2,0]) color("cyan") cubeX([TSWidth,TSLength,ScreenBaseThickness],1);
+		translate([-2,-2,0]) color("cyan") cuboid([TSWidth,TSLength,ScreenBaseThickness],rounding=1,p1=[0,0]);
 		if(Test) { // shorten print time for testing
-			translate([45,TSLength/2-60,-5]) color("khaki") cubeX([100,200,15],2);
+			translate([45,TSLength/2-60,-5]) color("khaki") cuboid([100,200,15],rounding=2,p1=[0,0]);
 		} else {
-			translate([120,TSLength/4,-5]) color("khaki") cubeX([TSLength/4,50,15],2);
+			translate([120,TSLength/4,-5]) color("khaki") cuboid([TSLength/4,50,15],rounding=2,p1=[0,0]);
 		}
 		translate([TSScrewLeftOffset,TSScrewTopOffset,0]) TSMountScrews();
 	}
@@ -201,10 +204,10 @@ module ScreenDepthStop(Depth=TSSpacerDepth-TSScreenThickness) {
 	//echo(TSDepth-TSScreenThickness);
 	difference() {
 		union() {
-			translate([-3,-2,0]) color("red") cubeX([6,8,Depth],1); // bottom left
-			translate([TSWidth-7,-1.9,0]) color("plum") cubeX([6,8,Depth],1); // bottom right
-			translate([TSWidth-7,TSLength-10,0])  color("blue") cubeX([6,8,Depth],1); // top right
-			translate([-3,TSLength-10,0])color("black") cubeX([6,8,Depth],1); // top left
+			translate([-3,-2,0]) color("red") cuboid([6,8,Depth],rounding=1,p1=[0,0]); // bottom left
+			translate([TSWidth-7,-1.9,0]) color("plum") cuboid([6,8,Depth],rounding=1,p1=[0,0]); // bottom right
+			translate([TSWidth-7,TSLength-10,0])  color("blue") cuboid([6,8,Depth],rounding=1,p1=[0,0]); // top right
+			translate([-3,TSLength-10,0])color("black") cuboid([6,8,Depth],rounding=1,p1=[0,0]); // top left
 		}
 		translate([-2,-2,TSDepth-TSScreenThickness]) Screen(TSScreenThickness);
 	}
@@ -230,7 +233,8 @@ module ScreenCorner(Thickness=10) {
 	difference() {
 		translate([-1,-1,0]) color("blue") cube([TSCornerRadius+2,TSCornerRadius+2,Thickness+10]);
 		translate([TSCornerRadius/2,TSCornerRadius/2,-2]) color("red") cylinder(h=Thickness+15,d=TSCornerRadius);
-		translate([-TSCornerRadius/2,TSCornerRadius/2,-2]) color("black") cube([TSCornerRadius*2,TSCornerRadius,Thickness+15]);
+		translate([-TSCornerRadius/2,TSCornerRadius/2,-2]) color("black")
+			cube([TSCornerRadius*2,TSCornerRadius,Thickness+15]);
 		translate([TSCornerRadius/2,-TSCornerRadius/2,-2]) color("black") cube([TSCornerRadius*2,TSCornerRadius,Thickness+15]);
 	}
 }
@@ -239,22 +243,22 @@ module ScreenCorner(Thickness=10) {
 
 module Frame(Depth=TSDepth,Test=0) {
 	if(!Test) {
-		translate([-3,-2,0]) color("blue") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
-		translate([-3,TSLength-5,0]) color("red") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
-		translate([-3,-2,0])color("black") cubeX([3,TSLength,Depth-TSScreenThickness],1);
-		translate([TSWidth-3,-2,0]) color("gray") cubeX([3,TSLength,Depth-TSScreenThickness],1);
+		translate([-3,-2,0]) color("blue") cuboid([TSWidth+2,3,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
+		translate([-3,TSLength-5,0]) color("red") cuboid([TSWidth+2,3,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
+		translate([-3,-2,0])color("black") cuboid([3,TSLength,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
+		translate([TSWidth-3,-2,0]) color("gray") cuboid([3,TSLength,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
 	}
 	if(Test==1) {
-		translate([-2,0,0]) color("black") cubeX([3,TSLength-3,Depth-TSScreenThickness],1);
+		translate([-2,0,0]) color("black") cuboid([3,TSLength-3,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
 	}
 	if(Test==2) {
-		translate([-3,-2,0]) color("blue") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+		translate([-3,-2,0]) color("blue") cuboid([TSWidth+2,3,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
 	}
 	if(Test==3) {
-		translate([-3,TSLength-5,0]) color("red") cubeX([TSWidth+2,3,Depth-TSScreenThickness],1);
+		translate([-3,TSLength-5,0]) color("red") cuboid([TSWidth+2,3,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
 	}
 	if(Test==4) {
-		translate([TSWidth-3,-2,0]) color("gray") cubeX([3,TSLength,Depth-TSScreenThickness],1);
+		translate([TSWidth-3,-2,0]) color("gray") cuboid([3,TSLength,Depth-TSScreenThickness],rounding=1,p1=[0,0]);
 	}
 
 }

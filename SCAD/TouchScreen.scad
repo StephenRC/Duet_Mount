@@ -2,12 +2,15 @@
 // TouchScreen.scad
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 12/25/2020
-// last update 1/10/21
+// last update 1/6/22
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// https://creativecommons.org/licenses/by-sa/4.0/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 12/25/20	- One piece touchscreen mount for 10" ebay touchscreen
 // 1/10/21	- Change to two seperate parts for the ends on the touchscreen, reduces print time and filament
+// 1/6/22	- BOSL2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-include <inc/cubex.scad>
+include <bosl2/std.scad>
 include <inc/screwsizes.scad>
 $fn=100;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +55,7 @@ module TouchScreenMount(Qty=1,ShowScrewV=0) {
 
 module Base() {
 	difference() {
-		color("cyan") cubeX([BaseL,BaseWidth,Thickness],2);
+		color("cyan") cuboid([BaseL,BaseWidth,Thickness],rounding=2,p1=[0,0]);
 		ScrewAccess();
 		translate([64,0,0]) ScrewAccess();
 		BaseScrewMount();
@@ -63,11 +66,11 @@ module Base() {
 
 module Support(ShowScrewV=0) {
 	rotate([16.7,0,0]) difference() {
-		translate([0,45,-13]) color("gray") cubeX([SupportWidth,Thickness,SupportHeightFront],2);
+		translate([0,45,-13]) color("gray") cuboid([SupportWidth,Thickness,SupportHeightFront],rounding=2,p1=[0,0]);
 		ScreenScrewMount(screw3,ShowScrewV);
 	}
 	difference() {
-		translate([0,0,0]) color("plum") cubeX([SupportWidth,Thickness,SupportHeightRear],2);
+		translate([0,0,0]) color("plum") cuboid([SupportWidth,Thickness,SupportHeightRear],rounding=2,p1=[0,0]);
 		translate([0,0,2]) ScrewAccess();
 	}
 }
@@ -75,7 +78,7 @@ module Support(ShowScrewV=0) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module ScreenScrewMount(Screw=screw3,ShowScrewV=0) {
-	if(ShowScrewV) #translate([0,50,-5]) rotate([0,0,0]) cubeX([10,Thickness,VertialScreenScrewHeight],2);
+	if(ShowScrewV) #translate([0,50,-5]) rotate([0,0,0]) cuboid([10,Thickness,VertialScreenScrewHeight],rounding=2,p1=[0,0]);
 	translate([5,53,-5]) rotate([90,0,0]) color("red") cylinder(h=Thickness*2,d=Screw);
 	translate([5,45,-5]) rotate([90,0,0]) ScrewCounterSink();
 	translate([5,53,VertialScreenScrewHeight-5]) rotate([90,0,0]) color("red") cylinder(h=Thickness*2,d=Screw);
@@ -86,7 +89,7 @@ module ScreenScrewMount(Screw=screw3,ShowScrewV=0) {
 
 module ExtrusionMount(Screw=screw5) {
 	difference() {
-		color("khaki") cubeX([BaseL,Thickness,40],2);
+		color("khaki") cuboid([BaseL,Thickness,40],rounding=2,p1=[0,0]);
 		translate([38,10,12]) rotate([90,0,0]) color("red") cylinder(h=Thickness*3,d=Screw);
 		translate([38,10,32]) rotate([90,0,0]) color("blue") cylinder(h=Thickness*3,d=Screw);
 		if(Screw==screw5) {
