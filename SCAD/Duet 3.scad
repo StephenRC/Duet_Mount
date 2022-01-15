@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 12/9/21
+// last update 1/13/22
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // https://creativecommons.org/licenses/by-sa/4.0/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,7 @@
 // 2/23/21	- Added EXIslide mount for 1LC
 // 5/6/21	- Added MountSpacerThickness1LC for the distance needed between LC and mount, 1LC v1.1 needs at least 1.5mm
 // 12/9/21	- Made antenna mount stronger, began conversion to BOSL2
+// 1/13/22	- Tweaked Blower4010()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //***********************************************************
 // May need to move cooling fan mount on platform
@@ -74,6 +75,7 @@ include <bosl2/std.scad>
 include <inc/brassinserts.scad>
 $fn=50;		// 100 takes a long, long time to render
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Use2mmInsert=1;
 Use2p5mmInsert=1;
 Use3mmInsert=1;
 Use4mmInsert=1;
@@ -91,6 +93,7 @@ FanPlatformMountOffset=32; // 32 for 40mm fan
 Spacing=17; 			// ir sensor bracket mount hole spacing
 NozzleDiameter=0.4;		// hotend nozzle size for wifi antenna protection support
 LayerThickness=0.3;		// layer thickness of print
+4040MountOffset=35.4;	// bolt hole offest on 4010 blower
 //----------------------------------------------------------------------------------------------------------
 D3Width = 134;		// width - Duet 3 6HC
 D3Length=140;		// length
@@ -130,7 +133,7 @@ CircuitBreakerWidth=15;
 CircuitBreakerLength=45; // includes connector clearance
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Duet3Mini5(0,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
+//Duet3Mini5(0,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
 //											  Arg5: 0; Arg5:AddPi: 0-No, 1-close pi, 2-pi far enoungh away for usbc
 //Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,0,0,0,0,0,1);
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
@@ -146,7 +149,7 @@ Duet3Mini5(0,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Widt
 //				ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0
 //Blower5150(); //blower_h=20,blower_w=15,blower_m_dist=43,ShiftUD=0,BlowerOffset=5
 //translate([100,0,0]) mirror([1,0,0]) Blower5150();
-//Blower4010();
+Blower4010();
 //ToolBoard1LC();
 //ToolBoard1LCEXOSlide();
 //translate([70,0,0])
@@ -1028,28 +1031,36 @@ module Blower5150(blower_h=20,blower_w=15,blower_m_dist=43,ShiftUD=0,BlowerOffse
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Blower4010(Show=0) {
+module Blower4010(Show=0,DoTab=1) {
 	difference() {
-		color("cyan") cuboid([46,40,3],rounding=2,p1=[0,0]);
-		translate([6,0,0]) 4010MountHoles();
-		translate([0,4,0]) 4010MountToDuet();
+		union() {
+			color("cyan") cuboid([47,45,PlatformThickness],rounding=2,p1=[0,0]);
+			if(DoTab) {
+				translate([1,1,0]) color("gray") cylinder(h=LayerThickness,d=15);
+				translate([1,38,0]) color("lightgray") cylinder(h=LayerThickness,d=15);
+				translate([44,1,0]) color("green") cylinder(h=LayerThickness,d=15);
+				translate([44,38,0]) color("salmon") cylinder(h=LayerThickness,d=15);
+			}
+		}
+		translate([8.5,5,0]) 4010MountHoles();
+		translate([0,6.5,0]) 4010MountToDuet();
 	}
+	translate([3,22,0]) color("purple") cylinder(h=18,d=3);
 	difference() {
-		translate([0,0,0]) color("pink") cuboid([6,40,15],rounding=1,p1=[0,0]);
-		translate([-1,5.5,3]) color("gray") cuboid([10,30,10],rounding=1,p1=[0,0]);
-		translate([0,4,0]) 4010MountToDuet();
+		color("pink") cuboid([6,45,19],rounding=2,p1=[0,0]);
+		translate([-1,8,PlatformThickness]) color("gray") cuboid([10,30,10],rounding=1,p1=[0,0]);
+		translate([0,6.5,0]) 4010MountToDuet();
 	}
 	if(Show) translate([20,20,3]) ShowBlower4010();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-4040MountOffset=34.9;
 
-module 4010MountHoles() {
-	translate([2.5,2.5,-2]) color("red") cylinder(h=10,d=screw2t);
-	translate([2.5+4040MountOffset,2.5,-2]) color("blue") cylinder(h=10,d=screw2t);
-	translate([2.5,2.5+4040MountOffset,-2]) color("plum") cylinder(h=10,d=screw2t);
-	translate([2.5+4040MountOffset,2.5+4040MountOffset,-2]) color("black") cylinder(h=10,d=screw2t);
+module 4010MountHoles(Screw=Yes2mmInsert(Use2mmInsert)) {
+	translate([0,0,-2]) color("red") cylinder(h=10,d=Screw);
+	translate([4040MountOffset,0,-2]) color("blue") cylinder(h=10,d=Screw);
+	translate([0,4040MountOffset,-2]) color("plum") cylinder(h=10,d=Screw);
+	translate([4040MountOffset,4040MountOffset,-2]) color("black") cylinder(h=10,d=Screw);
 }
 
 
