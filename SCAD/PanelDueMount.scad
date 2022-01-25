@@ -2,7 +2,7 @@
 // PanelDueMount.scad - something simple to hold dc42's PanelDue case to 2020 and my PI Touchscreen case
 ///////////////////////////////////////////////////////////////////////////////////////
 // created 7/12/2016
-// last update 1/15/22
+// last update 1/22/22
 ///////////////////////////////////////////////////////////////////////////////////////
 // https://creativecommons.org/licenses/by-sa/4.0/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,23 +60,23 @@ module AngleMountPanelDue(NoExtMount=0) {
 	difference() {
 		union() {
 			color("cyan") hull() {
-				cuboid([30,15,5],rounding=2,p1=[0,0]);
-				translate([0,13,8]) cuboid([30,4,5],rounding=2,p1=[0,0]);
+				cuboid([30,15,8],rounding=2,p1=[0,0]);
+				translate([0,23,18]) cuboid([30,5,5],rounding=2,p1=[0,0]);
 			}
 			translate([45,0,0]) color("red") hull() {
-				cuboid([30,15,4],rounding=2,p1=[0,0]);
-				translate([0,13,8]) cuboid([30,4,4],rounding=2,p1=[0,0]);
+				cuboid([30,15,8],rounding=2,p1=[0,0]);
+				translate([0,23,18]) cuboid([30,5,5],rounding=2,p1=[0,0]);
 			}
 		}
 		if(!NoExtMount) {
 			translate([23,10,-5]) color("black")cylinder(d=screw5,h=20);
-			translate([23,10,4]) color("white")cylinder(d=screw5hd,h=10);
+			translate([23,10,4]) color("white")cylinder(d=screw5hd,h=15);
 			translate([53,10,-5]) color("white")cylinder(d=screw5,h=20);
-			translate([53,10,4]) color("black")cylinder(d=screw5hd,h=10);
+			translate([53,10,4]) color("black")cylinder(d=screw5hd,h=15);
 		}
-		translate([15,13,-5]) rotate([35,0,0]) {
-			translate([0,0,0]) color("red") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
-			translate([46,0,0]) color("blue") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
+		rotate([35,0,0]) {
+			translate([15,10,0]) color("red") cyl(d=Yes5mmInsert(Use5mmInsert),h=20);
+			translate([61,10,0]) color("blue") cyl(d=Yes5mmInsert(Use5mmInsert),h=20);
 		}
 	}
 }
@@ -90,35 +90,27 @@ module AngleMountPanelDueSD(HorizontalMount=0) {
 				color("cyan") cuboid([30,20+thickness,thickness],rounding=2,p1=[0,0]);
 				translate([45,0,0]) color("purple") cuboid([30,20+thickness,thickness],rounding=2,p1=[0,0]);
 			}
-			color("blue") cuboid([30,thickness,33+thickness],rounding=2,p1=[0,0]);
-			translate([45,0,0]) color("khaki") cuboid([30,thickness,33+thickness],rounding=2,p1=[0,0]);
-			translate([0,-4,25]) color("pink") cuboid([30,thickness+1,8+thickness],rounding=2,p1=[0,0]);
-			translate([45,-4,25]) color("gray") cuboid([30,thickness+1,8+thickness],rounding=2,p1=[0,0]);
-			translate([0,0,25]) rotate([90,0,0]) AngleMountPanelDue(1);
-			translate([0,-2.81,26]) color("gray") hull() {
-				translate([0,-1.15,-1]) cuboid([30,6,4],rounding=2,p1=[0,0]);
-				translate([0,3,-6]) cuboid([30,4,4],rounding=2,p1=[0,0]);
+			translate([0,-2,0]) {
+				color("blue") cuboid([30,thickness,33+thickness],rounding=2,p1=[0,0]);
+				translate([45,0,0]) color("khaki") cuboid([30,thickness,33+thickness],rounding=2,p1=[0,0]);
 			}
-			translate([45,-2.81,26]) color("white") hull() {
-				translate([0,-1.15,-1]) cuboid([30,6,4],rounding=2,p1=[0,0]);
-				translate([0,3,-6]) cuboid([30,4,4],rounding=2,p1=[0,0]);
-			}
+			translate([0,5,25]) rotate([90,0,0]) AngleMountPanelDue(1);
 		}
-		translate([15,10,42]) rotate([125,0,0]) {
+		translate([15,10,40.7088]) rotate([125,0,0]) { // paneldue mounting
 			translate([0,0,0]) color("white") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
 			translate([46,0,0]) color("pink") cylinder(d=Yes5mmInsert(Use5mmInsert),h=20);
 		}
-		if(HorizontalMount) {
+		if(HorizontalMount) { // screw holes
 			translate([15,10+thickness,-3]) color("red") cylinder(h=15,d=screw5); 
 			translate([60,10+thickness,-3]) color("plum") cylinder(h=15,d=screw5);
 			translate([15,10+thickness,6]) color("plum") cylinder(h=5,d=screw5hd); 
 			translate([60,10+thickness,6]) color("red") cylinder(h=5,d=screw5hd);
 		} else {
-			echo("vertical");
+			echo("vertical"); // screw holes
 			translate([15,10,10]) rotate([90,0,0]) color("red") cylinder(h=15,d=screw5); 
 			translate([60,10,10]) rotate([90,0,0]) color("plum") cylinder(h=15,d=screw5);
-			translate([15,2,10]) rotate([90,0,0]) color("plum") cylinder(h=5,d=screw5hd); 
-			translate([60,2,10]) rotate([90,0,0]) color("red") cylinder(h=5,d=screw5hd);
+			translate([15,0,10]) rotate([90,0,0]) color("plum") cylinder(h=5,d=screw5hd); 
+			translate([60,0,10]) rotate([90,0,0]) color("red") cylinder(h=5,d=screw5hd);
 		}
 	}
 	if(HorizontalMount) {

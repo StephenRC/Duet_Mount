@@ -133,15 +133,13 @@ CircuitBreakerWidth=15;
 CircuitBreakerLength=45; // includes connector clearance
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Duet3Mini5(0,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
+//Duet3Mini5(2,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
 //											  Arg5: 0; Arg5:AddPi: 0-No, 1-close pi, 2-pi far enoungh away for usbc
-//Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,0,0,0,0,0,1);
-//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
-//Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);
-//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
+//Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,2);
+//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0
+Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,2,0,0,1);
+//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0,ExtTab=0,PI=0
 // this lets you to use a usb c power cable
-//Duet3_6HCPi4C(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0,0,1);
-//		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab=0,PI=0
 //Duet3_6HCCover(D3Width,D3Length,1);
 //Pi4Cover(1);
 //translate([145,0,0])		// move over if you set the above to not have the pi mount builtin
@@ -149,21 +147,19 @@ CircuitBreakerLength=45; // includes connector clearance
 //				ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert),DoSpacers=0,ShowPi=0
 //Blower5150(); //blower_h=20,blower_w=15,blower_m_dist=43,ShiftUD=0,BlowerOffset=5
 //translate([100,0,0]) mirror([1,0,0]) Blower5150();
-Blower4010();
+//Blower4010();
 //ToolBoard1LC();
 //ToolBoard1LCEXOSlide();
 //translate([70,0,0])
 //	ToolDistibutionBoard(1,0);	// arg one: ShortEnd,arg two: Spacers
 //AntennaMount(7,1); // 1st arg is mount diameter
-//Spacer(4,7,screw3+0.1,3);// bltouch fan mount spacer
-//		Qty=1,Thickness=PCSpacerThickness,Screw=screw3,BottomSize=3
 //Spacer(2,7,screw3+0.1,3);// 1LC mount spacer
 //Spacer(4,6,screw2+0.1,3);// PI mount spacer
-//CircuitBreaker();
+//CircuitBreakerMount();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module CircuitBreaker(Diameter=CircuitBreakerDiameter) {  // 5A circuit braker KUOYUH 88 Series
+module CircuitBreakerMount(Diameter=CircuitBreakerDiameter) {  // 5A circuit breaker KUOYUH 88 Series
 	difference() {
 		union() {
 			color("cyan") cuboid([CircuitBreakerWidth+5,Diameter*5,4],rounding=2,p1=[0,0]);
@@ -241,7 +237,9 @@ module Duet3Mini5(Blower=0,Width,Length,HoleOffset,AddPI=0,PiSide=1) {
 				translate([0,0,4.5]) cuboid([5,MountThickness,1],rounding=0.5,p1=[0,0]);
 			}
 		}
-	}	
+	}
+	if(Blower==1) translate([-50,100,0]) Blower5150();
+	else if(Blower==2) translate([-60,100,0]) Blower4010();
 
 }
 
@@ -420,7 +418,7 @@ module IRMountHoles(Screw=screw3) // ir screw holes for mounting to extruder pla
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Duet3_6HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab,PI=0)
+module Duet3_6HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0,Offset2020=0,ExtTab,PI=0)
 {
 	Platform(Width,Length,HoleOffset);
 	PlatformMount(Width,Length,Offset2020,ExtTab);
@@ -437,8 +435,15 @@ module Duet3_6HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Co
 			translate([125,117,MountThickness-1]) color("gray") cube([10,10,15]);
 		}
 	}	
-	if(Blower) translate([230,-5,0]) rotate([0,0,90]) Blower4010();
-	if(Blower==2 || Blower2) translate([185,-5,0]) rotate([0,0,90]) Blower4010();
+	if(Blower==1) translate([190,-7,0]) rotate([0,0,90]) Blower4010();
+	else if(Blower==2) {
+		translate([190,-7,0]) rotate([0,0,90]) Blower4010();
+		translate([250,-7,0]) rotate([0,0,90]) Blower4010();
+	} else if(Blower==3) translate([190,-7,0]) rotate([0,0,90]) Blower5150();
+	else if(Blower==4) {
+		translate([170,-7,0]) rotate([0,0,90]) Blower5150();
+		translate([200,-7,0]) rotate([0,0,90]) Blower5150();
+	}
 	if(PI) {
 		translate([20,30,0]) Spacer(4,SpacerThickness,screw3); // put them in one of the vent holes
 		translate([70,30,0]) Spacer(4,SpacerThickness,screw2p5); // put them in one of the vent holes
@@ -476,12 +481,19 @@ module Duet3_6HCPi4C(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,C
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Duet3_3HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Cover=0,Blower=0,Blower2=0,Offset2020=0,ExtTab,PI=0) {
+module Duet3_3HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0,Offset2020=0,ExtTab=0) {
 	Platform3HC(Width,Length,HoleOffset);
 	PlatformMount3HC(Width,Length,Offset2020,ExtTab);
 		Duet3HCSupports(Width,Length,HoleOffset);
-	if(Blower) translate([230,-5,0]) rotate([0,0,90]) Blower4010();
-	if(Blower2) translate([185,-5,0]) rotate([0,0,90]) Blower4010();
+	if(Blower==1) translate([160,-5,0]) rotate([0,0,90]) Blower4010();
+	else if(Blower==2) {
+		translate([160,-5,0]) rotate([0,0,90]) Blower4010();
+		translate([220,-5,0]) rotate([0,0,90]) Blower4010();
+	} else if(Blower==3) translate([140,-5,0]) rotate([0,0,90]) Blower5150();
+	else if(Blower==4) {
+		translate([140,-5,0]) rotate([0,0,90]) Blower5150();
+		translate([170,-5,0]) rotate([0,0,90]) Blower5150();
+	}
 	translate([20,30,0]) Spacer(4,SpacerThickness,screw3); // put them in one of the vent holes
 }
 
@@ -1037,9 +1049,9 @@ module Blower4010(Show=0,DoTab=1) {
 			color("cyan") cuboid([47,45,PlatformThickness],rounding=2,p1=[0,0]);
 			if(DoTab) {
 				translate([1,1,0]) color("gray") cylinder(h=LayerThickness,d=15);
-				translate([1,38,0]) color("lightgray") cylinder(h=LayerThickness,d=15);
+				translate([1,42,0]) color("lightgray") cylinder(h=LayerThickness,d=15);
 				translate([44,1,0]) color("green") cylinder(h=LayerThickness,d=15);
-				translate([44,38,0]) color("salmon") cylinder(h=LayerThickness,d=15);
+				translate([44,42,0]) color("salmon") cylinder(h=LayerThickness,d=15);
 			}
 		}
 		translate([8.5,5,0]) 4010MountHoles();
