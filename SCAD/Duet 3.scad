@@ -137,8 +137,9 @@ CircuitBreakerLength=45; // includes connector clearance
 //											  Arg5: 0; Arg5:AddPi: 0-No, 1-close pi, 2-pi far enoungh away for usbc
 //Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,2);
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0
-Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,2,0,0,1);
+//Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,2,0,0,1);
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0,ExtTab=0,PI=0
+Duet6HC_TDB_PI(); // Duet 6HC+PI4+Tool Distribution Board
 // this lets you to use a usb c power cable
 //Duet3_6HCCover(D3Width,D3Length,1);
 //Pi4Cover(1);
@@ -156,6 +157,34 @@ Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,2,0,0,1);
 //Spacer(2,7,screw3+0.1,3);// 1LC mount spacer
 //Spacer(4,6,screw2+0.1,3);// PI mount spacer
 //CircuitBreakerMount();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+module Duet6HC_TDB_PI() { // Duet 6HC+PI4+Tool Distribution Board
+	Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0);
+	translate([D3Width+20,-13,0]) rotate([0,0,0]) Pi4Mount(Yes2p5mmInsert(Use2p5mmInsert),0,6);
+	difference() {
+		translate([D3Width+4,-13,0]) pi4CloseAttachment(0);
+		translate([125,47,MountThickness-1]) color("lightgray") cube([10,10,15]);
+		translate([125,117,MountThickness-1]) color("gray") cube([10,10,15]);
+	}
+	color("purple") hull() {
+		translate([D3Width-1,-8.5,0]) color("cyan")  cuboid([5,5,13.5],rounding=2,p1=[0,0]);
+		translate([D3Width-1,30,0]) cuboid([5,5,5],rounding=2,p1=[0,0]);
+	}
+	translate([D3Width+20,69,0]) {
+		difference() {
+		ToolDistibutionBoard_base();
+		translate([TDBHoleBOffset,TDBHoleBOffset+MountThickness,0])
+			ToolDistibutionBoardMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
+		}
+		ToolDistibutionBoardSupport(0,0);
+		translate([-18,63,0]) color("green") cuboid([22,MountThickness,20],rounding=2,p1=[0,0]);
+		translate([-18,35,0]) color("red") cuboid([22,MountThickness,20],rounding=2,p1=[0,0]);
+	}
+	translate([68,30,0]) Spacer(4,MountThickness,screw3);;
+	translate([110,30,0]) Spacer(4,MountThickness,screw3);;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -256,7 +285,8 @@ module ToolDistibutionBoard(ShortEnd=0,Spacers=1) { // this mounts to the Single
 		ToolDistibutionBoardSupport(ShortEnd);
 		translate([TDBHoleBOffset,TDBHoleBOffset+MountThickness,0])
 			ToolDistibutionBoardMountHoles(Screw=Yes3mmInsert(Use3mmInsert,LargeBrassInsert));
-	}if(Spacers) translate([-8,8,0]) Spacer(4,MountThickness,screw3);;
+	}
+	if(Spacers) translate([-8,8,0]) Spacer(4,MountThickness,screw3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +343,7 @@ module ToolDistibutionBoardMount(ShortEnd=0,Screw=Yes2p5mmInsert(Use2p5mmInsert)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module ToolDistibutionBoardSupport(ShortEnd=0) {
+module ToolDistibutionBoardSupport(ShortEnd=0,Left=1) {
 	if(ShortEnd) {
 		difference() {
 			translate([11,0,0]) color("green") hull() {
@@ -330,9 +360,11 @@ module ToolDistibutionBoardSupport(ShortEnd=0) {
 			translate([38,MountThickness+9,MountThickness+6]) color("plum") rotate([90,0,0])  cylinder(h=10,d=screw5hd);
 		}
 	} else {
-		translate([0,8,0]) color("green") hull() {
-			color("white") cuboid([5,5,20],rounding=2,p1=[0,0]);
-			translate([TDBWidth-5,0,0]) color("white") cuboid([5,5,5],rounding=2,p1=[0,0]);
+		if(Left) {
+			translate([0,8,0]) color("green") hull() {
+				color("white") cuboid([5,5,20],rounding=2,p1=[0,0]);
+				translate([TDBWidth-5,0,0]) color("white") cuboid([5,5,5],rounding=2,p1=[0,0]);
+			}
 		}
 		translate([0,TDBLength/2,0]) color("white") hull() {
 			color("white") cuboid([5,5,20],rounding=2,p1=[0,0]);
@@ -427,7 +459,7 @@ module Duet3_6HCPi4(Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Bl
 		PlatformScrewMounts(Yes3mmInsert(Use3mmInsert,LargeBrassInsert),Width,Length,HoleOffset);
 	}
 	if(PI>=1) {
-		if(PI==2) %translate([138,51,-12])cube([5,89.2,5]); // measure for the 26 pin connector location
+		if(PI==2) %translate([138,51,-12]) cube([5,89.2,5]); // measure for the 26 pin connector location
 		translate([150,45.8,0]) rotate([0,0,0]) Pi4Mount(Yes2p5mmInsert(Use2p5mmInsert),0,6);
 		difference() {
 			translate([135,45.8,0]) pi4CloseAttachment(0);
@@ -528,20 +560,20 @@ module Duet3_6HCCover(Width,Length,Fan=0) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module pi4CloseAttachment(DoMiddle=1,Show=0) {
-	color("green") cuboid([19,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]);
-	translate([0,72,0]) color("plum") cuboid([19,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]); // vertical
+	//color("green") cuboid([19,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]);
+	//translate([0,72,0]) color("plum") cuboid([19,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]); // vertical
 	if(DoMiddle) {
-		translate([0,38,0]) color("purple") cuboid([19,MountThickness,MountThickness],rounding=2,p1=[0,0]);
-		translate([-3,38,0]) color("gray") cuboid([19,MountThickness,13.5],rounding=2,p1=[0,0]);
+		translate([0,38,0]) color("purple") cuboid([20,MountThickness,MountThickness],rounding=2,p1=[0,0]);
+		translate([-3,38,0]) color("gray") cuboid([20,MountThickness,13.5],rounding=2,p1=[0,0]);
 	}
-	translate([-3,4.5,0]) color("white") cuboid([19,MountThickness,13.5],rounding=2,p1=[0,0]);
-	translate([-3,75,0]) color("khaki") cuboid([19,MountThickness,13.5],rounding=2,p1=[0,0]);
-	if(Show) %translate([8,15.5,2]) cube([6,56,6]);  // make sure the 40pin connector will fit
+	translate([-3,4.5,0]) color("white") cuboid([20,MountThickness,13.5],rounding=2,p1=[0,0]);
+	translate([-3,75,0]) color("khaki") cuboid([20,MountThickness,13.5],rounding=2,p1=[0,0]);
+	if(Show) %translate([8,15.5,2]) cube([6,56,6]);		// make sure the 40pin connector will fit
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module pi4CloseAttachmentC(DoMiddle=1,Show=0) { // to usea usb c cable
+module pi4CloseAttachmentC(DoMiddle=1,Show=0) { // to use a usb c cable
 	color("green") cuboid([49,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]);
 	translate([0,72,0]) color("plum") cuboid([49,Pi4BracketWidth-2,MountThickness],rounding=2,p1=[0,0]); // vertical
 	if(DoMiddle) {
