@@ -2,7 +2,7 @@
 // Duet 3.scad - mount a duet 3 to 2020 extrusion and a case for the 7" pi touchscreen w/mounting
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // created 4/5/2020
-// last update 1/13/22
+// last update 2/10/22
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // https://creativecommons.org/licenses/by-sa/4.0/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,38 +38,19 @@
 // 5/6/21	- Added MountSpacerThickness1LC for the distance needed between LC and mount, 1LC v1.1 needs at least 1.5mm
 // 12/9/21	- Made antenna mount stronger, began conversion to BOSL2
 // 1/13/22	- Tweaked Blower4010()
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//***********************************************************
-// May need to move cooling fan mount on platform
-//***********************************************************
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Demensions from:
 // Duet 3 6HC: https://duet3d.dozuki.com/Wiki/Mounting_and_cooling_the_board
 // Duet 3 1LC: https://duet3d.dozuki.com/Wiki/Duet_3_Tool_Board
 // Tool Dristribution Board: https://duet3d.dozuki.com/Wiki/Tool_Distribution_Board
-// Deut 3 3HC: https://duet3d.dozuki.com/Wiki/Duet_3_Expansion_Hardware_Overview#Section_Dimensions
+// Duet 3 3HC: https://duet3d.dozuki.com/Wiki/Duet_3_Expansion_Hardware_Overview#Section_Dimensions
 // Rasberry PI: https://www.raspberrypi.org/documentation/hardware/raspberrypi/mechanical/README.md
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Tap the Duet 3 section screw holes with a 3mm tap, unless you're using brass inserts
-// Tap Pi4 for 2.5mm, unless you're using brass inserts
-//----------------------------------------------
-// https://forum.duet3d.com/topic/17409/duet-3-mini-5-initial-announcement/115?_=1604500956382  - dc42 11/4/20
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// NOTES: No room to connect the pi's hdmi
-//		  The mounting holes on the PI 4 can be drilled out to 3mm with no problems
-//******************************
-// Ribbon cable must between the duet 3 6hc and the pi. No overlap with the pi or duet, it will cause wierd problems
-// over the duet, partially conver the duet: starts print, then stops
-//*********************************
 // Duet 3M and 3HC may need adjustment to fan cooling postions
-//-------------------------------------------------------------------------------------
+// The PI4 must be supplied with a sepereate 5vdc power, Mini 5+ doesn't supply 5vdc to the PI
 // PI Touchscreen has to be supplied it's own 5vdc power. Powering via the dotstar connector gives low pi voltage warning.
 // Duet uses M3 screws and the Pi uses M2.5 screws
-//--------------------------------------------------------------------------------------------
-// **** Test the placement of the PI, make sure the WIFI works where you want to put the PI
-// For example, the PI WIFI doesn't in certain locations on my corexy
-//--------------------------------------------------------------------------------------------
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// includes
 include <inc/screwsizes.scad>
 include <bosl2/std.scad>
 include <inc/brassinserts.scad>
@@ -81,7 +62,7 @@ Use3mmInsert=1;
 Use4mmInsert=1;
 LargeBrassInsert=1;
 //------------------------------------------------------------------------------------------------------------
-PlatformThickness=5;	// thickness of platform
+PlatformThickness=6;	// thickness of platform
 MountThickness=5;		// thickness of mount
 MountSpacerThickness1LC=2; // distance needed between board and mount
 CoverThickness=3;		// thickness of the covers
@@ -133,13 +114,14 @@ CircuitBreakerWidth=15;
 CircuitBreakerLength=45; // includes connector clearance
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Duet3Mini5(2,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0 ? 1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
+//Duet3Mini5(0,D3MWidth,D3MLength,D3MHoleOffset,0);// Arg1:Blower 0,1; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
+//Duet3Mini5(2,D3MWidth,D3MLength,D3MHoleOffset,2);// Arg1:Blower 0,1,2; Arg2:Width; Arg3:Length; Arg4: HoleOffset;
 //											  Arg5: 0; Arg5:AddPi: 0-No, 1-close pi, 2-pi far enoungh away for usbc
 //Duet3_3HCPi4(3HCWidth,3HCLength,3HCHoleOffset,PCSpacerThickness,2);
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0
 //Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,2,0,0,1);
 //		args: Width,Length,HoleOffset,SpacerThickness=PCSpacerThickness,Blower=0-4,Offset2020=0,ExtTab=0,PI=0
-Duet6HC_TDB_PI(); // Duet 6HC+PI4+Tool Distribution Board
+Duet6HC_TDB_PI(2); // Duet 6HC+PI4+Tool Distribution Board
 // this lets you to use a usb c power cable
 //Duet3_6HCCover(D3Width,D3Length,1);
 //Pi4Cover(1);
@@ -160,7 +142,7 @@ Duet6HC_TDB_PI(); // Duet 6HC+PI4+Tool Distribution Board
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Duet6HC_TDB_PI() { // Duet 6HC+PI4+Tool Distribution Board
+module Duet6HC_TDB_PI(Blower=0) { // Duet 6HC+PI4+Tool Distribution Board
 	Duet3_6HCPi4(D3Width,D3Length,D3HoleOffset,PCSpacerThickness,0,0,0,0);
 	translate([D3Width+20,-13,0]) rotate([0,0,0]) Pi4Mount(Yes2p5mmInsert(Use2p5mmInsert),0,6);
 	difference() {
@@ -182,8 +164,16 @@ module Duet6HC_TDB_PI() { // Duet 6HC+PI4+Tool Distribution Board
 		translate([-18,63,0]) color("green") cuboid([22,MountThickness,20],rounding=2,p1=[0,0]);
 		translate([-18,35,0]) color("red") cuboid([22,MountThickness,20],rounding=2,p1=[0,0]);
 	}
-	translate([68,30,0]) Spacer(4,MountThickness,screw3);;
-	translate([110,30,0]) Spacer(4,MountThickness,screw3);;
+	translate([68,30,0]) Spacer(4,MountThickness,screw3);
+	translate([110,30,0]) Spacer(4,MountThickness,screw3);
+	if(Blower==1) {
+		translate([-50,100,0]) Blower5150();
+		translate([-50,60,0]) Blower5150();
+	}
+	if(Blower==2) {
+		translate([-60,100,0]) Blower4010();
+		translate([-60,40,0]) Blower4010();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
